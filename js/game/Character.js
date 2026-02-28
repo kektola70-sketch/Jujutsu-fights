@@ -532,4 +532,142 @@ export class Character {
         }
         
         if (direction.x !== 0 || direction.z !== 0) {
-            
+            this.setAnimation(this.isRunning ? 'run' : 'walk');
+        } else {
+            this.setAnimation('idle');
+        }
+    }
+    
+    jump() {
+        if (!this.isJumping && this.mesh.position.y <= 0) {
+            this.velocity.y = this.jumpForce;
+            this.isJumping = true;
+            this.setAnimation('jump');
+        }
+    }
+    
+    punch() {
+        if (this.isAttacking) return;
+        
+        this.isAttacking = true;
+        this.setAnimation('punch');
+        
+        setTimeout(() => {
+            this.isAttacking = false;
+            this.setAnimation('idle');
+        }, 300);
+        
+        return {
+            damage: 10,
+            range: 1.5,
+            knockback: 2
+        };
+    }
+    
+    kick() {
+        if (this.isAttacking) return;
+        
+        this.isAttacking = true;
+        this.setAnimation('kick');
+        
+        setTimeout(() => {
+            this.isAttacking = false;
+            this.setAnimation('idle');
+        }, 400);
+        
+        return {
+            damage: 15,
+            range: 2,
+            knockback: 3
+        };
+    }
+    
+    special() {
+        if (this.isAttacking || this.energy < 30) return;
+        
+        this.isAttacking = true;
+        this.energy -= 30;
+        this.setAnimation('special');
+        
+        setTimeout(() => {
+            this.isAttacking = false;
+            this.setAnimation('idle');
+        }, 800);
+        
+        return {
+            damage: 30,
+            range: 4,
+            knockback: 5
+        };
+    }
+    
+    block(isBlocking) {
+        this.isBlocking = isBlocking;
+        if (isBlocking) {
+            this.setAnimation('block');
+        } else {
+            this.setAnimation('idle');
+        }
+    }
+    
+    takeDamage(amount) {
+        if (this.isBlocking) {
+            amount *= 0.3; // Блок снижает урон на 70%
+        }
+        
+        this.health = Math.max(0, this.health - amount);
+        
+        if (!this.isBlocking) {
+            this.setAnimation('hit');
+            setTimeout(() => {
+                if (!this.isAttacking) {
+                    this.setAnimation('idle');
+                }
+            }, 200);
+        }
+        
+        if (this.health <= 0) {
+            this.die();
+        }
+        
+        return amount;
+    }
+    
+    die() {
+        this.isAlive = false;
+        // Анимация смерти - падение
+        this.bodyParts.torso.rotation.x = -1.5;
+        this.mesh.position.y = 0.3;
+    }
+    
+    // ===== ПОЛУЧИТЬ ХИТБОКС =====
+    
+    getHitbox() {
+        return {
+            x: this.mesh.position.x,
+            y: this.mesh.position.y + 1.5,
+            z: this.mesh.position.z,
+            width: 0.8,
+            height: 2.5,
+            depth: 0.4
+        };
+    }
+    
+    getPosition() {
+        return this.mesh.position.clone();
+    }
+    
+    setPosition(x, y, z) {
+        this.mesh.position.set(x, y, z);
+    }
+    
+    lookAt(target) {
+        const direction = target.x - this.mesh.position.x;
+        this.mesh.rotation.y = direction > 0 ? 0 : Math.PI;
+        this.direction = direction > 0 ? 1 : -1;
+    }
+    
+    destroy() {
+        this.scene.remove(this.mesh);
+    }
+}
