@@ -3,17 +3,694 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="description" content="Jujutsu Fight - Эпический 3D файтинг">
+    <meta name="theme-color" content="#0a0a0f">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Jujutsu Fight</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚔️</text></svg>">
 </head>
 <body>
-    <!-- Весь твой HTML код остаётся без изменений -->
-    <!-- ... -->
+    <!-- 3D Фон -->
+    <div id="background3D"></div>
 
-    <!-- Three.js -->
+    <!-- ===== ЭКРАН ЗАГРУЗКИ ===== -->
+    <div id="loadingScreen" class="screen active">
+        <div class="loading-content">
+            <div class="loading-logo">⚔️</div>
+            <h1 class="loading-title">JUJUTSU FIGHT</h1>
+            <div class="loading-bar">
+                <div class="loading-progress" id="loadingProgress"></div>
+            </div>
+            <p class="loading-text" id="loadingText">Загрузка...</p>
+        </div>
+    </div>
+
+    <!-- ===== ЭКРАН ВХОДА ===== -->
+    <div id="loginScreen" class="screen">
+        <div class="auth-container">
+            <h2 class="auth-title">ВХОД</h2>
+            
+            <form id="loginForm" class="auth-form">
+                <div class="input-group">
+                    <span class="input-icon">📧</span>
+                    <input type="email" id="loginEmail" placeholder="Email" required autocomplete="email">
+                </div>
+                
+                <div class="input-group">
+                    <span class="input-icon">🔒</span>
+                    <input type="password" id="loginPassword" placeholder="Пароль" required autocomplete="current-password">
+                    <button type="button" class="toggle-password" data-target="loginPassword">👁️</button>
+                </div>
+                
+                <div class="form-options">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="rememberMe">
+                        <span class="checkmark"></span>
+                        Запомнить меня
+                    </label>
+                    <a href="#" class="forgot-link" id="forgotPassword">Забыли пароль?</a>
+                </div>
+                
+                <button type="submit" class="auth-btn">ВОЙТИ</button>
+                
+                <div class="auth-error" id="loginError"></div>
+            </form>
+            
+            <div class="auth-divider">
+                <span>или</span>
+            </div>
+            
+            <div class="social-auth">
+                <button type="button" class="social-auth-btn google" id="googleLogin">
+                    <span>G</span> Google
+                </button>
+                <button type="button" class="social-auth-btn guest" id="guestLogin">
+                    <span>👤</span> Гость
+                </button>
+            </div>
+            
+            <p class="auth-switch">
+                Нет аккаунта? <a href="#" id="showRegister">Зарегистрируйтесь</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- ===== ЭКРАН РЕГИСТРАЦИИ ===== -->
+    <div id="registerScreen" class="screen">
+        <div class="auth-container">
+            <h2 class="auth-title">РЕГИСТРАЦИЯ</h2>
+            
+            <form id="registerForm" class="auth-form">
+                <div class="input-group">
+                    <span class="input-icon">👤</span>
+                    <input type="text" id="registerUsername" placeholder="Имя пользователя" required minlength="3" maxlength="20" autocomplete="username">
+                </div>
+                
+                <div class="input-group">
+                    <span class="input-icon">📧</span>
+                    <input type="email" id="registerEmail" placeholder="Email" required autocomplete="email">
+                </div>
+                
+                <div class="input-group">
+                    <span class="input-icon">🔒</span>
+                    <input type="password" id="registerPassword" placeholder="Пароль" required minlength="6" autocomplete="new-password">
+                    <button type="button" class="toggle-password" data-target="registerPassword">👁️</button>
+                </div>
+                
+                <div class="password-strength" id="passwordStrength">
+                    <div class="strength-bar">
+                        <div class="strength-fill" id="strengthFill"></div>
+                    </div>
+                    <span class="strength-text" id="strengthText">Введите пароль</span>
+                </div>
+                
+                <div class="input-group">
+                    <span class="input-icon">🔒</span>
+                    <input type="password" id="registerConfirm" placeholder="Подтвердите пароль" required autocomplete="new-password">
+                    <button type="button" class="toggle-password" data-target="registerConfirm">👁️</button>
+                </div>
+                
+                <div class="form-options">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="agreeTerms" required>
+                        <span class="checkmark"></span>
+                        Я согласен с <a href="#" id="termsLink">условиями</a>
+                    </label>
+                </div>
+                
+                <button type="submit" class="auth-btn">СОЗДАТЬ АККАУНТ</button>
+                
+                <div class="auth-error" id="registerError"></div>
+            </form>
+            
+            <p class="auth-switch">
+                Уже есть аккаунт? <a href="#" id="showLogin">Войдите</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- ===== ЭКРАН ВОССТАНОВЛЕНИЯ ПАРОЛЯ ===== -->
+    <div id="forgotScreen" class="screen">
+        <div class="auth-container">
+            <h2 class="auth-title">ВОССТАНОВЛЕНИЕ</h2>
+            <p class="auth-subtitle">Введите email для сброса пароля</p>
+            
+            <form id="forgotForm" class="auth-form">
+                <div class="input-group">
+                    <span class="input-icon">📧</span>
+                    <input type="email" id="forgotEmail" placeholder="Email" required autocomplete="email">
+                </div>
+                
+                <button type="submit" class="auth-btn">ОТПРАВИТЬ</button>
+                
+                <div class="auth-success" id="forgotSuccess"></div>
+                <div class="auth-error" id="forgotError"></div>
+            </form>
+            
+            <p class="auth-switch">
+                <a href="#" id="backToLogin">← Вернуться к входу</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- ===== ГЛАВНОЕ МЕНЮ ===== -->
+    <div id="mainMenu" class="screen">
+        <div class="menu-content">
+            <!-- Профиль пользователя -->
+            <div class="user-profile" id="userProfile">
+                <div class="user-avatar" id="userAvatar">👤</div>
+                <div class="user-info">
+                    <span class="user-name" id="userName">Игрок</span>
+                    <span class="user-level" id="userLevel">Уровень 1</span>
+                </div>
+                <button class="logout-btn" id="logoutBtn" title="Выйти">🚪</button>
+            </div>
+
+            <h1 class="game-title">JUJUTSU FIGHT</h1>
+            
+            <div class="menu-buttons">
+                <button class="menu-btn" id="playBtn">
+                    <span>⚔️ ИГРАТЬ</span>
+                </button>
+                <button class="menu-btn" id="charactersBtn">
+                    <span>👤 ПЕРСОНАЖИ</span>
+                </button>
+                <button class="menu-btn" id="profileBtn">
+                    <span>📊 ПРОФИЛЬ</span>
+                </button>
+                <button class="menu-btn" id="settingsBtn">
+                    <span>⚙️ НАСТРОЙКИ</span>
+                </button>
+                <button class="menu-btn" id="aboutBtn">
+                    <span>ℹ️ ОБ ИГРЕ</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ЭКРАН ПРОФИЛЯ ===== -->
+    <div id="profileScreen" class="screen">
+        <div class="screen-content">
+            <h2 class="screen-title">ПРОФИЛЬ</h2>
+            
+            <div class="profile-header">
+                <div class="profile-avatar-large" id="profileAvatar">👤</div>
+                <div class="profile-main-info">
+                    <h3 id="profileName">Игрок</h3>
+                    <p id="profileEmail">email@example.com</p>
+                    <div class="profile-level">
+                        <span>Уровень <strong id="profileLevel">1</strong></span>
+                        <div class="xp-bar">
+                            <div class="xp-fill" id="xpFill"></div>
+                        </div>
+                        <span class="xp-text" id="xpText">0 / 100 XP</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="profile-stats">
+                <div class="stat-card">
+                    <div class="stat-icon">⚔️</div>
+                    <div class="stat-value" id="statBattles">0</div>
+                    <div class="stat-label">Боёв</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🏆</div>
+                    <div class="stat-value" id="statWins">0</div>
+                    <div class="stat-label">Побед</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">💀</div>
+                    <div class="stat-value" id="statLosses">0</div>
+                    <div class="stat-label">Поражений</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📈</div>
+                    <div class="stat-value" id="statWinrate">0%</div>
+                    <div class="stat-label">Винрейт</div>
+                </div>
+            </div>
+            
+            <div class="profile-actions">
+                <button class="menu-btn small" id="editProfileBtn">✏️ Редактировать</button>
+                <button class="menu-btn small" id="changePasswordBtn">🔑 Сменить пароль</button>
+            </div>
+            
+            <button class="back-btn" id="backFromProfile">← НАЗАД</button>
+        </div>
+    </div>
+
+    <!-- ===== МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ ПРОФИЛЯ ===== -->
+    <div id="editProfileModal" class="modal">
+        <div class="modal-content">
+            <h3>Редактирование профиля</h3>
+            <form id="editProfileForm">
+                <div class="input-group">
+                    <span class="input-icon">👤</span>
+                    <input type="text" id="editUsername" placeholder="Имя пользователя" required minlength="3" maxlength="20">
+                </div>
+                
+                <div class="avatar-selector">
+                    <p>Выберите аватар:</p>
+                    <div class="avatar-options">
+                        <span class="avatar-option" data-avatar="👤">👤</span>
+                        <span class="avatar-option" data-avatar="👨‍🦳">👨‍🦳</span>
+                        <span class="avatar-option" data-avatar="👦">👦</span>
+                        <span class="avatar-option" data-avatar="🧑‍🦱">🧑‍🦱</span>
+                        <span class="avatar-option" data-avatar="👹">👹</span>
+                        <span class="avatar-option" data-avatar="💪">💪</span>
+                        <span class="avatar-option" data-avatar="🥷">🥷</span>
+                        <span class="avatar-option" data-avatar="⚔️">⚔️</span>
+                        <span class="avatar-option" data-avatar="🔥">🔥</span>
+                        <span class="avatar-option" data-avatar="💀">💀</span>
+                        <span class="avatar-option" data-avatar="👁️">👁️</span>
+                        <span class="avatar-option" data-avatar="🐉">🐉</span>
+                    </div>
+                </div>
+                
+                <div class="modal-buttons">
+                    <button type="button" class="modal-btn cancel" id="cancelEditProfile">Отмена</button>
+                    <button type="submit" class="modal-btn confirm">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== МОДАЛЬНОЕ ОКНО СМЕНЫ ПАРОЛЯ ===== -->
+    <div id="changePasswordModal" class="modal">
+        <div class="modal-content">
+            <h3>Смена пароля</h3>
+            <form id="changePasswordForm">
+                <div class="input-group">
+                    <span class="input-icon">🔒</span>
+                    <input type="password" id="currentPassword" placeholder="Текущий пароль" required>
+                </div>
+                <div class="input-group">
+                    <span class="input-icon">🔒</span>
+                    <input type="password" id="newPassword" placeholder="Новый пароль" required minlength="6">
+                </div>
+                <div class="input-group">
+                    <span class="input-icon">🔒</span>
+                    <input type="password" id="confirmNewPassword" placeholder="Подтвердите пароль" required>
+                </div>
+                
+                <div class="modal-buttons">
+                    <button type="button" class="modal-btn cancel" id="cancelChangePassword">Отмена</button>
+                    <button type="submit" class="modal-btn confirm">Сменить</button>
+                </div>
+                
+                <div class="auth-error" id="changePasswordError"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== ЭКРАН ПЕРСОНАЖЕЙ ===== -->
+    <div id="charactersScreen" class="screen">
+        <div class="screen-content">
+            <h2 class="screen-title">ВЫБОР ПЕРСОНАЖА</h2>
+            
+            <div class="characters-grid">
+                <!-- Годжо Сатору -->
+                <div class="character-card" data-character="gojo">
+                    <div class="character-image">👨‍🦳</div>
+                    <div class="character-name">Годжо Сатору</div>
+                    <div class="character-stats">
+                        <div class="stat">
+                            <span>Сила</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 95%"></div></div>
+                        </div>
+                        <div class="stat">
+                            <span>Скорость</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 90%"></div></div>
+                        </div>
+                        <div class="stat">
+                            <span>Техника</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 100%"></div></div>
+                        </div>
+                    </div>
+                    <div class="character-locked unlocked">✓ Доступен</div>
+                </div>
+
+                <!-- Итадори Юджи -->
+                <div class="character-card" data-character="itadori">
+                    <div class="character-image">👦</div>
+                    <div class="character-name">Итадори Юджи</div>
+                    <div class="character-stats">
+                        <div class="stat">
+                            <span>Сила</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 85%"></div></div>
+                        </div>
+                        <div class="stat">
+                            <span>Скорость</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 80%"></div></div>
+                        </div>
+                        <div class="stat">
+                            <span>Техника</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 60%"></div></div>
+                        </div>
+                    </div>
+                    <div class="character-locked unlocked">✓ Доступен</div>
+                </div>
+
+                <!-- Фушигуро Мегуми -->
+                <div class="character-card" data-character="megumi">
+                    <div class="character-image">🧑‍🦱</div>
+                    <div class="character-name">Фушигуро Мегуми</div>
+                    <div class="character-stats">
+                        <div class="stat">
+                            <span>Сила</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 70%"></div></div>
+                        </div>
+                        <div class="stat">
+                            <span>Скорость</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 75%"></div></div>
+                        </div>
+                        <div class="stat">
+                            <span>Техника</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 85%"></div></div>
+                        </div>
+                    </div>
+                    <div class="character-locked unlocked">✓ Доступен</div>
+                </div>
+
+                <!-- Сукуна -->
+                <div class="character-card locked" data-character="sukuna">
+                    <div class="character-image">👹</div>
+                    <div class="character-name">Сукуна</div>
+                    <div class="character-stats">
+                        <div class="stat">
+                            <span>Сила</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 100%"></div></div>
+                        </div>
+                        <div class="stat">
+                            <span>Скорость</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 95%"></div></div>
+                        </div>
+                        <div class="stat">
+                            <span>Техника</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 100%"></div></div>
+                        </div>
+                    </div>
+                    <div class="character-locked">🔒 Уровень 10</div>
+                </div>
+
+                <!-- Тодо Аой -->
+                <div class="character-card locked" data-character="todo">
+                    <div class="character-image">💪</div>
+                    <div class="character-name">Тодо Аой</div>
+                    <div class="character-stats">
+                        <div class="stat">
+                            <span>Сила</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 90%"></div></div>
+                        </div>
+                        <div class="stat">
+                            <span>Скорость</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 70%"></div></div>
+                        </div>
+                        <div class="stat">
+                            <span>Техника</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 75%"></div></div>
+                        </div>
+                    </div>
+                    <div class="character-locked">🔒 Уровень 5</div>
+                </div>
+
+                <!-- Нанами Кенто -->
+                <div class="character-card locked" data-character="nanami">
+                    <div class="character-image">🕴️</div>
+                    <div class="character-name">Нанами Кенто</div>
+                    <div class="character-stats">
+                        <div class="stat">
+                            <span>Сила</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 80%"></div></div>
+                        </div>
+                        <div class="stat">
+                            <span>Скорость</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 65%"></div></div>
+                        </div>
+                        <div class="stat">
+                            <span>Техника</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 90%"></div></div>
+                        </div>
+                    </div>
+                    <div class="character-locked">🔒 Уровень 7</div>
+                </div>
+
+                <!-- Маки Зенин -->
+                <div class="character-card locked" data-character="maki">
+                    <div class="character-image">👩</div>
+                    <div class="character-name">Маки Зенин</div>
+                    <div class="character-stats">
+                        <div class="stat">
+                            <span>Сила</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 85%"></div></div>
+                        </div>
+                        <div class="stat">
+                            <span>Скорость</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 85%"></div></div>
+                        </div>
+                        <div class="stat">
+                            <span>Техника</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 70%"></div></div>
+                        </div>
+                    </div>
+                    <div class="character-locked">🔒 Уровень 3</div>
+                </div>
+
+                <!-- Инумаки Тоге -->
+                <div class="character-card locked" data-character="inumaki">
+                    <div class="character-image">🗣️</div>
+                    <div class="character-name">Инумаки Тоге</div>
+                    <div class="character-stats">
+                        <div class="stat">
+                            <span>Сила</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 50%"></div></div>
+                        </div>
+                        <div class="stat">
+                            <span>Скорость</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 70%"></div></div>
+                        </div>
+                        <div class="stat">
+                            <span>Техника</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 95%"></div></div>
+                        </div>
+                    </div>
+                    <div class="character-locked">🔒 Уровень 8</div>
+                </div>
+
+                <!-- Панда -->
+                <div class="character-card locked" data-character="panda">
+                    <div class="character-image">🐼</div>
+                    <div class="character-name">Панда</div>
+                    <div class="character-stats">
+                        <div class="stat">
+                            <span>Сила</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 88%"></div></div>
+                        </div>
+                        <div class="stat">
+                            <span>Скорость</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 60%"></div></div>
+                        </div>
+                        <div class="stat">
+                            <span>Техника</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 65%"></div></div>
+                        </div>
+                    </div>
+                    <div class="character-locked">🔒 Уровень 6</div>
+                </div>
+            </div>
+
+            <button class="back-btn" id="backFromCharacters">← НАЗАД</button>
+        </div>
+    </div>
+
+    <!-- ===== ЭКРАН НАСТРОЕК ===== -->
+    <div id="settingsScreen" class="screen">
+        <div class="screen-content">
+            <h2 class="screen-title">НАСТРОЙКИ</h2>
+            
+            <div class="settings-list">
+                <div class="setting-item">
+                    <span class="setting-label">🔊 Музыка</span>
+                    <div class="setting-control">
+                        <input type="range" id="musicVolume" min="0" max="100" value="70">
+                        <span class="volume-value" id="musicValue">70%</span>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <span class="setting-label">🔉 Звуки</span>
+                    <div class="setting-control">
+                        <input type="range" id="sfxVolume" min="0" max="100" value="80">
+                        <span class="volume-value" id="sfxValue">80%</span>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <span class="setting-label">🎮 Вибрация</span>
+                    <div class="setting-control">
+                        <label class="toggle">
+                            <input type="checkbox" id="vibrationToggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <span class="setting-label">📊 Качество графики</span>
+                    <div class="setting-control">
+                        <select id="graphicsQuality">
+                            <option value="low">Низкое</option>
+                            <option value="medium" selected>Среднее</option>
+                            <option value="high">Высокое</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <span class="setting-label">🌐 Язык</span>
+                    <div class="setting-control">
+                        <select id="language">
+                            <option value="ru" selected>Русский</option>
+                            <option value="en">English</option>
+                            <option value="ja">日本語</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <span class="setting-label">🎯 Сложность</span>
+                    <div class="setting-control">
+                        <select id="difficulty">
+                            <option value="easy">Легко</option>
+                            <option value="normal" selected>Нормально</option>
+                            <option value="hard">Сложно</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <span class="setting-label">🖥️ FPS Счётчик</span>
+                    <div class="setting-control">
+                        <label class="toggle">
+                            <input type="checkbox" id="fpsToggle">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <span class="setting-label">🌙 Тёмная тема</span>
+                    <div class="setting-control">
+                        <label class="toggle">
+                            <input type="checkbox" id="darkModeToggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-buttons">
+                <button class="menu-btn small" id="resetSettings">🔄 Сбросить</button>
+                <button class="menu-btn small" id="saveSettings">💾 Сохранить</button>
+            </div>
+
+            <button class="back-btn" id="backFromSettings">← НАЗАД</button>
+        </div>
+    </div>
+
+    <!-- ===== ЭКРАН ОБ ИГРЕ ===== -->
+    <div id="aboutScreen" class="screen">
+        <div class="screen-content">
+            <h2 class="screen-title">ОБ ИГРЕ</h2>
+            
+            <div class="about-content">
+                <div class="about-logo">⚔️</div>
+                <h3>JUJUTSU FIGHT</h3>
+                <p class="version">Версия 1.0.0</p>
+                
+                <div class="about-description">
+                    <p>Эпический 3D файтинг по мотивам аниме "Магическая Битва" (Jujutsu Kaisen)!</p>
+                    <p>Сражайтесь за любимых персонажей, используйте уникальные техники проклятой энергии и станьте сильнейшим магом!</p>
+                </div>
+
+                <div class="about-features">
+                    <h4>✨ Особенности:</h4>
+                    <ul>
+                        <li>🎮 9 играбельных персонажей</li>
+                        <li>⚡ Уникальные спецприёмы для каждого</li>
+                        <li>🏟️ Различные арены для сражений</li>
+                        <li>📱 Поддержка мобильных устройств</li>
+                        <li>🎵 Эпичный саундтрек</li>
+                        <li>🏆 Система рейтинга и достижений</li>
+                        <li>👥 Мультиплеер (в разработке)</li>
+                        <li>🌐 Кроссплатформенность</li>
+                    </ul>
+                </div>
+
+                <div class="about-controls">
+                    <h4>🎮 Управление (ПК):</h4>
+                    <div class="controls-grid">
+                        <div class="control-item">
+                            <kbd>W A S D</kbd>
+                            <span>Движение</span>
+                        </div>
+                        <div class="control-item">
+                            <kbd>J</kbd>
+                            <span>Удар</span>
+                        </div>
+                        <div class="control-item">
+                            <kbd>K</kbd>
+                            <span>Удар ногой</span>
+                        </div>
+                        <div class="control-item">
+                            <kbd>L</kbd>
+                            <span>Спецприём</span>
+                        </div>
+                        <div class="control-item">
+                            <kbd>Space</kbd>
+                            <span>Прыжок</span>
+                        </div>
+                        <div class="control-item">
+                            <kbd>Shift</kbd>
+                            <span>Блок</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="about-credits">
+                    <h4>👨‍💻 Создатели:</h4>
+                    <p>Разработано с ❤️</p>
+                    <p>Powered by Three.js & Firebase</p>
+                    <p>© 2024 Jujutsu Fight Team</p>
+                </div>
+
+                <div class="social-links">
+                    <a href="#" class="social-btn" title="Email">📧</a>
+                    <a href="#" class="social-btn" title="Twitter">🐦</a>
+                    <a href="#" class="social-btn" title="YouTube">📺</a>
+                    <a href="#" class="social-btn" title="Discord">💬</a>
+                    <a href="#" class="social-btn" title="GitHub">🐙</a>
+                </div>
+            </div>
+
+            <button class="back-btn" id="backFromAbout">← НАЗАД</button>
+        </div>
+    </div>
+
+    <!-- ===== УВЕДОМЛЕНИЕ ===== -->
+    <div id="notification" class="notification">
+        <span id="notificationText"></span>
+    </div>
+
+    <!-- ===== СКРИПТЫ ===== -->
+    
+    <!-- Three.js для 3D графики -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     
-    <!-- Firebase и приложение (как ES6 модули) -->
+    <!-- Firebase и приложение (ES6 модули) -->
     <script type="module" src="js/main.js"></script>
 </body>
 </html>
