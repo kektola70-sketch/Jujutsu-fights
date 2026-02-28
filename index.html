@@ -158,7 +158,6 @@
     <!-- ===== ГЛАВНОЕ МЕНЮ ===== -->
     <div id="mainMenu" class="screen">
         <div class="menu-content">
-            <!-- Профиль пользователя -->
             <div class="user-profile" id="userProfile">
                 <div class="user-avatar" id="userAvatar">👤</div>
                 <div class="user-info">
@@ -188,6 +187,61 @@
                 </button>
             </div>
         </div>
+    </div>
+
+    <!-- ===== ЭКРАН ИГРЫ ===== -->
+    <div id="gameScreen" class="screen">
+        <div id="gameContainer"></div>
+        
+        <div class="game-hud">
+            <!-- Здоровье игрока -->
+            <div class="hud-player">
+                <div class="hud-name" id="hudPlayerName">Игрок</div>
+                <div class="hud-health-bar">
+                    <div class="hud-health-fill" id="hudPlayerHealth"></div>
+                </div>
+                <div class="hud-energy-bar">
+                    <div class="hud-energy-fill" id="hudPlayerEnergy"></div>
+                </div>
+            </div>
+            
+            <!-- Таймер -->
+            <div class="hud-timer" id="hudTimer">99</div>
+            
+            <!-- Здоровье врага -->
+            <div class="hud-enemy">
+                <div class="hud-name" id="hudEnemyName">Враг</div>
+                <div class="hud-health-bar">
+                    <div class="hud-health-fill" id="hudEnemyHealth"></div>
+                </div>
+                <div class="hud-energy-bar">
+                    <div class="hud-energy-fill" id="hudEnemyEnergy"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="game-controls-hint">
+            <p>WASD - движение | J - удар | K - пинок | L - спецприём | Space - прыжок | Shift - блок</p>
+        </div>
+        
+        <!-- Мобильное управление -->
+        <div class="mobile-controls" id="mobileControls">
+            <div class="joystick-area">
+                <div class="joystick" id="joystick">
+                    <div class="joystick-knob" id="joystickKnob"></div>
+                </div>
+            </div>
+            <div class="action-buttons">
+                <button class="action-btn punch-btn" id="btnPunch">👊</button>
+                <button class="action-btn kick-btn" id="btnKick">🦵</button>
+                <button class="action-btn special-btn" id="btnSpecial">✨</button>
+                <button class="action-btn jump-btn" id="btnJump">⬆️</button>
+                <button class="action-btn block-btn" id="btnBlock">🛡️</button>
+            </div>
+        </div>
+        
+        <button class="back-btn game-back" id="backFromGame">← МЕНЮ</button>
+        <button class="pause-btn" id="pauseBtn">⏸️</button>
     </div>
 
     <!-- ===== ЭКРАН ПРОФИЛЯ ===== -->
@@ -312,193 +366,70 @@
             <h2 class="screen-title">ВЫБОР ПЕРСОНАЖА</h2>
             
             <div class="characters-grid">
-                <!-- Годжо Сатору -->
                 <div class="character-card" data-character="gojo">
                     <div class="character-image">👨‍🦳</div>
                     <div class="character-name">Годжо Сатору</div>
                     <div class="character-stats">
-                        <div class="stat">
-                            <span>Сила</span>
-                            <div class="stat-bar"><div class="stat-fill" style="width: 95%"></div></div>
-                        </div>
-                        <div class="stat">
-                            <span>Скорость</span>
-                            <div class="stat-bar"><div class="stat-fill" style="width: 90%"></div></div>
-                        </div>
-                        <div class="stat">
-                            <span>Техника</span>
-                            <div class="stat-bar"><div class="stat-fill" style="width: 100%"></div></div>
-                        </div>
+                        <div class="stat"><span>Сила</span><div class="stat-bar"><div class="stat-fill" style="width: 95%"></div></div></div>
+                        <div class="stat"><span>Скорость</span><div class="stat-bar"><div class="stat-fill" style="width: 90%"></div></div></div>
+                        <div class="stat"><span>Техника</span><div class="stat-bar"><div class="stat-fill" style="width: 100%"></div></div></div>
                     </div>
                     <div class="character-locked unlocked">✓ Доступен</div>
                 </div>
 
-                <!-- Итадори Юджи -->
                 <div class="character-card" data-character="itadori">
                     <div class="character-image">👦</div>
                     <div class="character-name">Итадори Юджи</div>
                     <div class="character-stats">
-                        <div class="stat">
-                            <span>Сила</span>
-                            <div class="stat-bar"><div class="stat-fill" style="width: 85%"></div></div>
-                        </div>
-                        <div class="stat">
-                            <span>Скорость</span>
-                            <div class="stat-bar"><div class="stat-fill" style="width: 80%"></div></div>
-                        </div>
-                        <div class="stat">
-                            <span>Техника</span>
-                            <div class="stat-bar"><div class="stat-fill" style="width: 60%"></div></div>
-                        </div>
+                        <div class="stat"><span>Сила</span><div class="stat-bar"><div class="stat-fill" style="width: 85%"></div></div></div>
+                        <div class="stat"><span>Скорость</span><div class="stat-bar"><div class="stat-fill" style="width: 80%"></div></div></div>
+                        <div class="stat"><span>Техника</span><div class="stat-bar"><div class="stat-fill" style="width: 60%"></div></div></div>
                     </div>
                     <div class="character-locked unlocked">✓ Доступен</div>
                 </div>
 
-                <!-- Фушигуро Мегуми -->
                 <div class="character-card" data-character="megumi">
                     <div class="character-image">🧑‍🦱</div>
                     <div class="character-name">Фушигуро Мегуми</div>
                     <div class="character-stats">
-                        <div class="stat">
-                            <span>Сила</span>
-                            <div class="stat-bar"><div class="stat-fill" style="width: 70%"></div></div>
-                        </div>
-                        <div class="stat">
-                            <span>Скорость</span>
-                            <div class="stat-bar"><div class="stat-fill" style="width: 75%"></div></div>
-                        </div>
-                        <div class="stat">
-                            <span>Техника</span>
-                            <div class="stat-bar"><div class="stat-fill" style="width: 85%"></div></div>
-                        </div>
+                        <div class="stat"><span>Сила</span><div class="stat-bar"><div class="stat-fill" style="width: 70%"></div></div></div>
+                        <div class="stat"><span>Скорость</span><div class="stat-bar"><div class="stat-fill" style="width: 75%"></div></div></div>
+                        <div class="stat"><span>Техника</span><div class="stat-bar"><div class="stat-fill" style="width: 85%"></div></div></div>
                     </div>
                     <div class="character-locked unlocked">✓ Доступен</div>
                 </div>
 
-                <!-- Сукуна -->
                 <div class="character-card locked" data-character="sukuna">
                     <div class="character-image">👹</div>
                     <div class="character-name">Сукуна</div>
                     <div class="character-stats">
-                        <div class="stat">
-                            <span>Сила</span>
-                            <div class="stat-bar"><div class="stat-fill" style="width: 100%"></div></div>
-                        </div>
-                        <div class="stat">
-                            <span>Скорость</span>
-                            <div class="stat-bar"><div class="stat-fill" style="width: 95%"></div></div>
-                        </div>
-                        <div class="stat">
-                            <span>Техника</span>
-                            <div class="stat-bar"><div class="stat-fill" style="width: 100%"></div></div>
-                        </div>
+                        <div class="stat"><span>Сила</span><div class="stat-bar"><div class="stat-fill" style="width: 100%"></div></div></div>
+                        <div class="stat"><span>Скорость</span><div class="stat-bar"><div class="stat-fill" style="width: 95%"></div></div></div>
+                        <div class="stat"><span>Техника</span><div class="stat-bar"><div class="stat-fill" style="width: 100%"></div></div></div>
                     </div>
                     <div class="character-locked">🔒 Уровень 10</div>
                 </div>
 
-                <!-- Тодо Аой -->
                 <div class="character-card locked" data-character="todo">
                     <div class="character-image">💪</div>
                     <div class="character-name">Тодо Аой</div>
                     <div class="character-stats">
-                        <div class="stat">
-                            <span>Сила</span>
-                            <div class="stat-bar"><div class="stat-fill" style="width: 90%"></div></div>
-                        </div>
-                        <div class="stat">
-                            <span>Скорость</span>
-                            <div class="stat-bar"><div class="stat-fill" style="width: 70%"></div></div>
-                        </div>
-                        <div class="stat">
-                            <span>Техника</span>
-                            <div class="stat-bar"><div class="stat-fill" style="width: 75%"></div></div>
-                        </div>
+                        <div class="stat"><span>Сила</span><div class="stat-bar"><div class="stat-fill" style="width: 90%"></div></div></div>
+                        <div class="stat"><span>Скорость</span><div class="stat-bar"><div class="stat-fill" style="width: 70%"></div></div></div>
+                        <div class="stat"><span>Техника</span><div class="stat-bar"><div class="stat-fill" style="width: 75%"></div></div></div>
                     </div>
                     <div class="character-locked">🔒 Уровень 5</div>
                 </div>
 
-                <!-- Нанами Кенто -->
                 <div class="character-card locked" data-character="nanami">
                     <div class="character-image">🕴️</div>
                     <div class="character-name">Нанами Кенто</div>
                     <div class="character-stats">
-                        <div class="stat">
-                            <span>Сила</span>
-                            <div class="stat-bar"><div class="stat-fill" style="width: 80%"></div></div>
-                        </div>
-                        <div class="stat">
-                            <span>Скорость</span>
-                            <div class="stat-bar"><div class="stat-fill" style="width: 65%"></div></div>
-                        </div>
-                        <div class="stat">
-                            <span>Техника</span>
-                            <div class="stat-bar"><div class="stat-fill" style="width: 90%"></div></div>
-                        </div>
+                        <div class="stat"><span>Сила</span><div class="stat-bar"><div class="stat-fill" style="width: 80%"></div></div></div>
+                        <div class="stat"><span>Скорость</span><div class="stat-bar"><div class="stat-fill" style="width: 65%"></div></div></div>
+                        <div class="stat"><span>Техника</span><div class="stat-bar"><div class="stat-fill" style="width: 90%"></div></div></div>
                     </div>
                     <div class="character-locked">🔒 Уровень 7</div>
-                </div>
-
-                <!-- Маки Зенин -->
-                <div class="character-card locked" data-character="maki">
-                    <div class="character-image">👩</div>
-                    <div class="character-name">Маки Зенин</div>
-                    <div class="character-stats">
-                        <div class="stat">
-                            <span>Сила</span>
-                            <div class="stat-bar"><div class="stat-fill" style="width: 85%"></div></div>
-                        </div>
-                        <div class="stat">
-                            <span>Скорость</span>
-                            <div class="stat-bar"><div class="stat-fill" style="width: 85%"></div></div>
-                        </div>
-                        <div class="stat">
-                            <span>Техника</span>
-                            <div class="stat-bar"><div class="stat-fill" style="width: 70%"></div></div>
-                        </div>
-                    </div>
-                    <div class="character-locked">🔒 Уровень 3</div>
-                </div>
-
-                <!-- Инумаки Тоге -->
-                <div class="character-card locked" data-character="inumaki">
-                    <div class="character-image">🗣️</div>
-                    <div class="character-name">Инумаки Тоге</div>
-                    <div class="character-stats">
-                        <div class="stat">
-                            <span>Сила</span>
-                            <div class="stat-bar"><div class="stat-fill" style="width: 50%"></div></div>
-                        </div>
-                        <div class="stat">
-                            <span>Скорость</span>
-                            <div class="stat-bar"><div class="stat-fill" style="width: 70%"></div></div>
-                        </div>
-                        <div class="stat">
-                            <span>Техника</span>
-                            <div class="stat-bar"><div class="stat-fill" style="width: 95%"></div></div>
-                        </div>
-                    </div>
-                    <div class="character-locked">🔒 Уровень 8</div>
-                </div>
-
-                <!-- Панда -->
-                <div class="character-card locked" data-character="panda">
-                    <div class="character-image">🐼</div>
-                    <div class="character-name">Панда</div>
-                    <div class="character-stats">
-                        <div class="stat">
-                            <span>Сила</span>
-                            <div class="stat-bar"><div class="stat-fill" style="width: 88%"></div></div>
-                        </div>
-                        <div class="stat">
-                            <span>Скорость</span>
-                            <div class="stat-bar"><div class="stat-fill" style="width: 60%"></div></div>
-                        </div>
-                        <div class="stat">
-                            <span>Техника</span>
-                            <div class="stat-bar"><div class="stat-fill" style="width: 65%"></div></div>
-                        </div>
-                    </div>
-                    <div class="character-locked">🔒 Уровень 6</div>
                 </div>
             </div>
 
@@ -539,7 +470,7 @@
                 </div>
 
                 <div class="setting-item">
-                    <span class="setting-label">📊 Качество графики</span>
+                    <span class="setting-label">📊 Качество</span>
                     <div class="setting-control">
                         <select id="graphicsQuality">
                             <option value="low">Низкое</option>
@@ -570,26 +501,6 @@
                         </select>
                     </div>
                 </div>
-
-                <div class="setting-item">
-                    <span class="setting-label">🖥️ FPS Счётчик</span>
-                    <div class="setting-control">
-                        <label class="toggle">
-                            <input type="checkbox" id="fpsToggle">
-                            <span class="toggle-slider"></span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="setting-item">
-                    <span class="setting-label">🌙 Тёмная тема</span>
-                    <div class="setting-control">
-                        <label class="toggle">
-                            <input type="checkbox" id="darkModeToggle" checked>
-                            <span class="toggle-slider"></span>
-                        </label>
-                    </div>
-                </div>
             </div>
 
             <div class="settings-buttons">
@@ -612,51 +523,30 @@
                 <p class="version">Версия 1.0.0</p>
                 
                 <div class="about-description">
-                    <p>Эпический 3D файтинг по мотивам аниме "Магическая Битва" (Jujutsu Kaisen)!</p>
-                    <p>Сражайтесь за любимых персонажей, используйте уникальные техники проклятой энергии и станьте сильнейшим магом!</p>
+                    <p>Эпический 3D файтинг по мотивам аниме "Магическая Битва"!</p>
+                    <p>Сражайтесь за любимых персонажей, используйте уникальные техники проклятой энергии!</p>
                 </div>
 
                 <div class="about-features">
                     <h4>✨ Особенности:</h4>
                     <ul>
-                        <li>🎮 9 играбельных персонажей</li>
-                        <li>⚡ Уникальные спецприёмы для каждого</li>
-                        <li>🏟️ Различные арены для сражений</li>
+                        <li>🎮 Множество играбельных персонажей</li>
+                        <li>⚡ Уникальные спецприёмы</li>
+                        <li>🏟️ Различные арены</li>
                         <li>📱 Поддержка мобильных устройств</li>
                         <li>🎵 Эпичный саундтрек</li>
-                        <li>🏆 Система рейтинга и достижений</li>
-                        <li>👥 Мультиплеер (в разработке)</li>
-                        <li>🌐 Кроссплатформенность</li>
                     </ul>
                 </div>
 
                 <div class="about-controls">
-                    <h4>🎮 Управление (ПК):</h4>
+                    <h4>🎮 Управление:</h4>
                     <div class="controls-grid">
-                        <div class="control-item">
-                            <kbd>W A S D</kbd>
-                            <span>Движение</span>
-                        </div>
-                        <div class="control-item">
-                            <kbd>J</kbd>
-                            <span>Удар</span>
-                        </div>
-                        <div class="control-item">
-                            <kbd>K</kbd>
-                            <span>Удар ногой</span>
-                        </div>
-                        <div class="control-item">
-                            <kbd>L</kbd>
-                            <span>Спецприём</span>
-                        </div>
-                        <div class="control-item">
-                            <kbd>Space</kbd>
-                            <span>Прыжок</span>
-                        </div>
-                        <div class="control-item">
-                            <kbd>Shift</kbd>
-                            <span>Блок</span>
-                        </div>
+                        <div class="control-item"><kbd>WASD</kbd><span>Движение</span></div>
+                        <div class="control-item"><kbd>J</kbd><span>Удар</span></div>
+                        <div class="control-item"><kbd>K</kbd><span>Пинок</span></div>
+                        <div class="control-item"><kbd>L</kbd><span>Спецприём</span></div>
+                        <div class="control-item"><kbd>Space</kbd><span>Прыжок</span></div>
+                        <div class="control-item"><kbd>Shift</kbd><span>Блок</span></div>
                     </div>
                 </div>
 
@@ -664,15 +554,6 @@
                     <h4>👨‍💻 Создатели:</h4>
                     <p>Разработано с ❤️</p>
                     <p>Powered by Three.js & Firebase</p>
-                    <p>© 2024 Jujutsu Fight Team</p>
-                </div>
-
-                <div class="social-links">
-                    <a href="#" class="social-btn" title="Email">📧</a>
-                    <a href="#" class="social-btn" title="Twitter">🐦</a>
-                    <a href="#" class="social-btn" title="YouTube">📺</a>
-                    <a href="#" class="social-btn" title="Discord">💬</a>
-                    <a href="#" class="social-btn" title="GitHub">🐙</a>
                 </div>
             </div>
 
@@ -686,11 +567,7 @@
     </div>
 
     <!-- ===== СКРИПТЫ ===== -->
-    
-    <!-- Three.js для 3D графики -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    
-    <!-- Firebase и приложение (ES6 модули) -->
     <script type="module" src="js/main.js"></script>
 </body>
 </html>
