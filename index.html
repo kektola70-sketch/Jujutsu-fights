@@ -2,16 +2,18 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Jujutsu Fight</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <!-- Меню -->
-    <div id="menu" class="menu-container">
+    <!-- 3D Фон -->
+    <div id="background3D"></div>
+
+    <!-- Главное меню -->
+    <div id="mainMenu" class="screen active">
         <div class="menu-content">
             <h1 class="game-title">JUJUTSU FIGHT</h1>
-            
             <div class="menu-buttons">
                 <button class="menu-btn" id="playBtn">
                     <span>⚔️ ИГРАТЬ</span>
@@ -27,53 +29,290 @@
                 </button>
             </div>
         </div>
-
-        <!-- 3D фон для меню -->
-        <div id="menuBackground"></div>
     </div>
 
-    <!-- Игровой контейнер -->
-    <div id="gameContainer" class="game-container" style="display: none;">
-        <div id="gameCanvas"></div>
-        
-        <!-- UI игры -->
-        <div class="game-ui">
-            <div class="health-bar player">
-                <div class="health-fill" id="playerHealth"></div>
-                <span class="health-text">HP</span>
-            </div>
+    <!-- Экран персонажей -->
+    <div id="charactersScreen" class="screen">
+        <div class="screen-content">
+            <h2 class="screen-title">ВЫБОР ПЕРСОНАЖА</h2>
             
-            <div class="timer" id="timer">99</div>
-            
-            <div class="health-bar enemy">
-                <div class="health-fill" id="enemyHealth"></div>
-                <span class="health-text">HP</span>
-            </div>
-        </div>
+            <div class="characters-grid">
+                <div class="character-card" data-character="gojo">
+                    <div class="character-image">👨‍🦳</div>
+                    <div class="character-name">Годжо Сатору</div>
+                    <div class="character-stats">
+                        <div class="stat">
+                            <span>Сила</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 95%"></div></div>
+                        </div>
+                        <div class="stat">
+                            <span>Скорость</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 90%"></div></div>
+                        </div>
+                        <div class="stat">
+                            <span>Техника</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 100%"></div></div>
+                        </div>
+                    </div>
+                    <div class="character-locked unlocked">✓ Доступен</div>
+                </div>
 
-        <!-- Мобильные кнопки управления -->
-        <div class="mobile-controls" id="mobileControls">
-            <div class="joystick-container">
-                <div class="joystick" id="joystick">
-                    <div class="joystick-knob"></div>
+                <div class="character-card" data-character="itadori">
+                    <div class="character-image">👦</div>
+                    <div class="character-name">Итадори Юджи</div>
+                    <div class="character-stats">
+                        <div class="stat">
+                            <span>Сила</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 85%"></div></div>
+                        </div>
+                        <div class="stat">
+                            <span>Скорость</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 80%"></div></div>
+                        </div>
+                        <div class="stat">
+                            <span>Техника</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 60%"></div></div>
+                        </div>
+                    </div>
+                    <div class="character-locked unlocked">✓ Доступен</div>
+                </div>
+
+                <div class="character-card" data-character="megumi">
+                    <div class="character-image">🧑‍🦱</div>
+                    <div class="character-name">Фушигуро Мегуми</div>
+                    <div class="character-stats">
+                        <div class="stat">
+                            <span>Сила</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 70%"></div></div>
+                        </div>
+                        <div class="stat">
+                            <span>Скорость</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 75%"></div></div>
+                        </div>
+                        <div class="stat">
+                            <span>Техника</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 85%"></div></div>
+                        </div>
+                    </div>
+                    <div class="character-locked unlocked">✓ Доступен</div>
+                </div>
+
+                <div class="character-card locked" data-character="sukuna">
+                    <div class="character-image">👹</div>
+                    <div class="character-name">Сукуна</div>
+                    <div class="character-stats">
+                        <div class="stat">
+                            <span>Сила</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 100%"></div></div>
+                        </div>
+                        <div class="stat">
+                            <span>Скорость</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 95%"></div></div>
+                        </div>
+                        <div class="stat">
+                            <span>Техника</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 100%"></div></div>
+                        </div>
+                    </div>
+                    <div class="character-locked">🔒 Заблокирован</div>
+                </div>
+
+                <div class="character-card locked" data-character="todo">
+                    <div class="character-image">💪</div>
+                    <div class="character-name">Тодо Аой</div>
+                    <div class="character-stats">
+                        <div class="stat">
+                            <span>Сила</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 90%"></div></div>
+                        </div>
+                        <div class="stat">
+                            <span>Скорость</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 70%"></div></div>
+                        </div>
+                        <div class="stat">
+                            <span>Техника</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 75%"></div></div>
+                        </div>
+                    </div>
+                    <div class="character-locked">🔒 Заблокирован</div>
+                </div>
+
+                <div class="character-card locked" data-character="nanami">
+                    <div class="character-image">🕴️</div>
+                    <div class="character-name">Нанами Кенто</div>
+                    <div class="character-stats">
+                        <div class="stat">
+                            <span>Сила</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 80%"></div></div>
+                        </div>
+                        <div class="stat">
+                            <span>Скорость</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 65%"></div></div>
+                        </div>
+                        <div class="stat">
+                            <span>Техника</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width: 90%"></div></div>
+                        </div>
+                    </div>
+                    <div class="character-locked">🔒 Заблокирован</div>
                 </div>
             </div>
-            
-            <div class="action-buttons">
-                <button class="action-btn" id="punchBtn">👊</button>
-                <button class="action-btn" id="kickBtn">🦵</button>
-                <button class="action-btn" id="specialBtn">✨</button>
-                <button class="action-btn" id="blockBtn">🛡️</button>
-            </div>
-        </div>
 
-        <button class="pause-btn" id="pauseBtn">⏸️</button>
+            <button class="back-btn" id="backFromCharacters">← НАЗАД</button>
+        </div>
+    </div>
+
+    <!-- Экран настроек -->
+    <div id="settingsScreen" class="screen">
+        <div class="screen-content">
+            <h2 class="screen-title">НАСТРОЙКИ</h2>
+            
+            <div class="settings-list">
+                <div class="setting-item">
+                    <span class="setting-label">🔊 Музыка</span>
+                    <div class="setting-control">
+                        <input type="range" id="musicVolume" min="0" max="100" value="70">
+                        <span class="volume-value" id="musicValue">70%</span>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <span class="setting-label">🔉 Звуки</span>
+                    <div class="setting-control">
+                        <input type="range" id="sfxVolume" min="0" max="100" value="80">
+                        <span class="volume-value" id="sfxValue">80%</span>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <span class="setting-label">🎮 Вибрация</span>
+                    <div class="setting-control">
+                        <label class="toggle">
+                            <input type="checkbox" id="vibrationToggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <span class="setting-label">📊 Качество графики</span>
+                    <div class="setting-control">
+                        <select id="graphicsQuality">
+                            <option value="low">Низкое</option>
+                            <option value="medium" selected>Среднее</option>
+                            <option value="high">Высокое</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <span class="setting-label">🌐 Язык</span>
+                    <div class="setting-control">
+                        <select id="language">
+                            <option value="ru" selected>Русский</option>
+                            <option value="en">English</option>
+                            <option value="ja">日本語</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <span class="setting-label">🎯 Сложность</span>
+                    <div class="setting-control">
+                        <select id="difficulty">
+                            <option value="easy">Легко</option>
+                            <option value="normal" selected>Нормально</option>
+                            <option value="hard">Сложно</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-buttons">
+                <button class="menu-btn small" id="resetSettings">🔄 Сбросить</button>
+                <button class="menu-btn small" id="saveSettings">💾 Сохранить</button>
+            </div>
+
+            <button class="back-btn" id="backFromSettings">← НАЗАД</button>
+        </div>
+    </div>
+
+    <!-- Экран об игре -->
+    <div id="aboutScreen" class="screen">
+        <div class="screen-content">
+            <h2 class="screen-title">ОБ ИГРЕ</h2>
+            
+            <div class="about-content">
+                <div class="about-logo">⚔️</div>
+                <h3>JUJUTSU FIGHT</h3>
+                <p class="version">Версия 1.0.0</p>
+                
+                <div class="about-description">
+                    <p>Эпический 3D файтинг по мотивам аниме "Магическая Битва"!</p>
+                    <p>Сражайтесь за любимых персонажей, используйте уникальные техники проклятой энергии и станьте сильнейшим магом!</p>
+                </div>
+
+                <div class="about-features">
+                    <h4>Особенности:</h4>
+                    <ul>
+                        <li>🎮 Множество играбельных персонажей</li>
+                        <li>⚡ Уникальные спецприёмы</li>
+                        <li>🏟️ Различные арены</li>
+                        <li>📱 Поддержка мобильных устройств</li>
+                        <li>🎵 Эпичный саундтрек</li>
+                    </ul>
+                </div>
+
+                <div class="about-controls">
+                    <h4>Управление (ПК):</h4>
+                    <div class="controls-grid">
+                        <div class="control-item">
+                            <kbd>W A S D</kbd>
+                            <span>Движение</span>
+                        </div>
+                        <div class="control-item">
+                            <kbd>J</kbd>
+                            <span>Удар</span>
+                        </div>
+                        <div class="control-item">
+                            <kbd>K</kbd>
+                            <span>Удар ногой</span>
+                        </div>
+                        <div class="control-item">
+                            <kbd>L</kbd>
+                            <span>Спецприём</span>
+                        </div>
+                        <div class="control-item">
+                            <kbd>Space</kbd>
+                            <span>Блок</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="about-credits">
+                    <h4>Создатели:</h4>
+                    <p>Разработано с ❤️</p>
+                    <p>Powered by Three.js</p>
+                </div>
+
+                <div class="social-links">
+                    <a href="#" class="social-btn">📧</a>
+                    <a href="#" class="social-btn">🐦</a>
+                    <a href="#" class="social-btn">📺</a>
+                </div>
+            </div>
+
+            <button class="back-btn" id="backFromAbout">← НАЗАД</button>
+        </div>
+    </div>
+
+    <!-- Уведомление -->
+    <div id="notification" class="notification">
+        <span id="notificationText"></span>
     </div>
 
     <!-- Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="js/menu.js"></script>
-    <script src="js/game.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>
