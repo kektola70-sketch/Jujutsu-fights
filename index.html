@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jujutsu Fight</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Меню -->
+    <div id="menu" class="menu-container">
+        <div class="menu-content">
+            <h1 class="game-title">JUJUTSU FIGHT</h1>
+            
+            <div class="menu-buttons">
+                <button class="menu-btn" id="playBtn">
+                    <span>⚔️ ИГРАТЬ</span>
+                </button>
+                <button class="menu-btn" id="charactersBtn">
+                    <span>👤 ПЕРСОНАЖИ</span>
+                </button>
+                <button class="menu-btn" id="settingsBtn">
+                    <span>⚙️ НАСТРОЙКИ</span>
+                </button>
+                <button class="menu-btn" id="aboutBtn">
+                    <span>ℹ️ ОБ ИГРЕ</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 3D фон для меню -->
+        <div id="menuBackground"></div>
+    </div>
+
+    <!-- Игровой контейнер -->
+    <div id="gameContainer" class="game-container" style="display: none;">
+        <div id="gameCanvas"></div>
+        
+        <!-- UI игры -->
+        <div class="game-ui">
+            <div class="health-bar player">
+                <div class="health-fill" id="playerHealth"></div>
+                <span class="health-text">HP</span>
+            </div>
+            
+            <div class="timer" id="timer">99</div>
+            
+            <div class="health-bar enemy">
+                <div class="health-fill" id="enemyHealth"></div>
+                <span class="health-text">HP</span>
+            </div>
+        </div>
+
+        <!-- Мобильные кнопки управления -->
+        <div class="mobile-controls" id="mobileControls">
+            <div class="joystick-container">
+                <div class="joystick" id="joystick">
+                    <div class="joystick-knob"></div>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="action-btn" id="punchBtn">👊</button>
+                <button class="action-btn" id="kickBtn">🦵</button>
+                <button class="action-btn" id="specialBtn">✨</button>
+                <button class="action-btn" id="blockBtn">🛡️</button>
+            </div>
+        </div>
+
+        <button class="pause-btn" id="pauseBtn">⏸️</button>
+    </div>
+
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="js/menu.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
