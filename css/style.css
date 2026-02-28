@@ -15,7 +15,7 @@ body {
     touch-action: manipulation;
 }
 
-/* 3D Фон */
+/* ===== 3D ФОН ===== */
 #background3D {
     position: fixed;
     top: 0;
@@ -25,7 +25,7 @@ body {
     z-index: 0;
 }
 
-/* Экраны */
+/* ===== ЭКРАНЫ ===== */
 .screen {
     position: fixed;
     top: 0;
@@ -173,7 +173,7 @@ body {
     opacity: 1;
 }
 
-/* Сила пароля */
+/* ===== СИЛА ПАРОЛЯ ===== */
 .password-strength {
     text-align: left;
     margin-top: -5px;
@@ -194,20 +194,39 @@ body {
     border-radius: 2px;
 }
 
-.strength-fill.weak { width: 33%; background: #ff4444; }
-.strength-fill.medium { width: 66%; background: #ffaa00; }
-.strength-fill.strong { width: 100%; background: #00ff88; }
+.strength-fill.weak {
+    width: 33%;
+    background: #ff4444;
+}
+
+.strength-fill.medium {
+    width: 66%;
+    background: #ffaa00;
+}
+
+.strength-fill.strong {
+    width: 100%;
+    background: #00ff88;
+}
 
 .strength-text {
     font-size: 0.8rem;
     color: #888;
 }
 
-.strength-text.weak { color: #ff4444; }
-.strength-text.medium { color: #ffaa00; }
-.strength-text.strong { color: #00ff88; }
+.strength-text.weak {
+    color: #ff4444;
+}
 
-/* Опции формы */
+.strength-text.medium {
+    color: #ffaa00;
+}
+
+.strength-text.strong {
+    color: #00ff88;
+}
+
+/* ===== ОПЦИИ ФОРМЫ ===== */
 .form-options {
     display: flex;
     justify-content: space-between;
@@ -261,7 +280,7 @@ body {
     text-decoration: underline;
 }
 
-/* Кнопка авторизации */
+/* ===== КНОПКА АВТОРИЗАЦИИ ===== */
 .auth-btn {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border: none;
@@ -292,7 +311,7 @@ body {
     transform: none;
 }
 
-/* Ошибки и успех */
+/* ===== ОШИБКИ И УСПЕХ ===== */
 .auth-error,
 .auth-success {
     padding: 10px;
@@ -319,7 +338,7 @@ body {
     display: block;
 }
 
-/* Разделитель */
+/* ===== РАЗДЕЛИТЕЛЬ ===== */
 .auth-divider {
     display: flex;
     align-items: center;
@@ -340,7 +359,7 @@ body {
     font-size: 0.9rem;
 }
 
-/* Социальная авторизация */
+/* ===== СОЦИАЛЬНАЯ АВТОРИЗАЦИЯ ===== */
 .social-auth {
     display: flex;
     gap: 15px;
@@ -367,11 +386,20 @@ body {
     border-color: rgba(255, 255, 255, 0.3);
 }
 
-.social-auth-btn.google:hover { border-color: #ea4335; }
-.social-auth-btn.guest:hover { border-color: #667eea; }
-.social-auth-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.social-auth-btn.google:hover {
+    border-color: #ea4335;
+}
 
-/* Переключение */
+.social-auth-btn.guest:hover {
+    border-color: #667eea;
+}
+
+.social-auth-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ===== ПЕРЕКЛЮЧЕНИЕ ===== */
 .auth-switch {
     margin-top: 25px;
     color: #888;
@@ -388,7 +416,7 @@ body {
     text-decoration: underline;
 }
 
-/* ===== ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ В МЕНЮ ===== */
+/* ===== ПРОФИЛЬ В МЕНЮ ===== */
 .user-profile {
     display: flex;
     align-items: center;
@@ -508,7 +536,7 @@ body {
     color: #888;
 }
 
-/* Статистика */
+/* ===== СТАТИСТИКА ===== */
 .profile-stats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
@@ -587,6 +615,8 @@ body {
     width: 90%;
     max-width: 400px;
     text-align: center;
+    max-height: 90vh;
+    overflow-y: auto;
 }
 
 .modal-content h3 {
@@ -792,7 +822,11 @@ body {
     left: 0;
 }
 
-/* HUD */
+#gameContainer canvas {
+    display: block;
+}
+
+/* ===== HUD ===== */
 .game-hud {
     position: absolute;
     top: 20px;
@@ -807,7 +841,7 @@ body {
 
 .hud-player,
 .hud-enemy {
-    width: 250px;
+    width: 280px;
 }
 
 .hud-enemy {
@@ -815,25 +849,26 @@ body {
 }
 
 .hud-name {
-    font-size: 1rem;
+    font-size: 1.1rem;
     font-weight: bold;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
     color: #fff;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
 }
 
 .hud-health-bar,
 .hud-energy-bar {
-    height: 20px;
+    height: 25px;
     background: rgba(0, 0, 0, 0.7);
     border: 2px solid #fff;
-    border-radius: 10px;
+    border-radius: 12px;
     overflow: hidden;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
+    position: relative;
 }
 
 .hud-energy-bar {
-    height: 10px;
+    height: 12px;
 }
 
 .hud-health-fill {
@@ -841,6 +876,7 @@ body {
     width: 100%;
     background: linear-gradient(90deg, #ff0000, #ff6600, #00ff00);
     transition: width 0.3s ease;
+    border-radius: 10px;
 }
 
 .hud-energy-fill {
@@ -848,34 +884,50 @@ body {
     width: 100%;
     background: linear-gradient(90deg, #0066ff, #00d4ff);
     transition: width 0.3s ease;
+    border-radius: 6px;
 }
 
 .hud-timer {
     font-size: 3rem;
     font-weight: bold;
     color: #fff;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-    background: rgba(0, 0, 0, 0.5);
-    padding: 10px 25px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.6);
+    padding: 10px 30px;
     border-radius: 15px;
     border: 3px solid #fff;
+    min-width: 100px;
+    text-align: center;
 }
 
-/* Подсказки управления */
+/* ===== ПОДСКАЗКИ УПРАВЛЕНИЯ ===== */
 .game-controls-hint {
     position: absolute;
     bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
     background: rgba(0, 0, 0, 0.7);
-    padding: 10px 20px;
+    padding: 10px 25px;
     border-radius: 10px;
     font-size: 0.85rem;
     color: #888;
     z-index: 100;
+    pointer-events: none;
 }
 
-/* Кнопки в игре */
+.camera-hint {
+    position: absolute;
+    bottom: 60px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 8px 15px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    color: #888;
+    z-index: 50;
+}
+
+/* ===== КНОПКИ В ИГРЕ ===== */
 .game-back {
     position: absolute;
     top: 20px;
@@ -899,13 +951,17 @@ body {
     cursor: pointer;
     z-index: 101;
     transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .pause-btn:hover {
     background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
 }
 
-/* Мобильное управление */
+/* ===== МОБИЛЬНОЕ УПРАВЛЕНИЕ ===== */
 .mobile-controls {
     display: none;
     position: absolute;
@@ -956,14 +1012,17 @@ body {
 }
 
 .action-btn {
-    width: 60px;
-    height: 60px;
+    width: 65px;
+    height: 65px;
     background: rgba(102, 126, 234, 0.5);
     border: 2px solid rgba(255, 255, 255, 0.5);
     border-radius: 50%;
     font-size: 1.5rem;
     cursor: pointer;
     transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .action-btn:active {
@@ -973,27 +1032,37 @@ body {
 
 .jump-btn {
     grid-column: 2;
+    grid-row: 1;
 }
 
-.block-btn {
+.dodge-btn {
     grid-column: 1;
-    grid-row: 2;
-}
-
-.punch-btn {
-    grid-column: 2;
-    grid-row: 2;
-}
-
-.kick-btn {
-    grid-column: 3;
-    grid-row: 2;
+    grid-row: 1;
+    background: rgba(0, 200, 255, 0.5);
 }
 
 .special-btn {
     grid-column: 3;
     grid-row: 1;
     background: rgba(255, 215, 0, 0.5);
+}
+
+.block-btn {
+    grid-column: 1;
+    grid-row: 2;
+    background: rgba(100, 100, 100, 0.5);
+}
+
+.punch-btn {
+    grid-column: 2;
+    grid-row: 2;
+    background: rgba(255, 100, 100, 0.5);
+}
+
+.kick-btn {
+    grid-column: 3;
+    grid-row: 2;
+    background: rgba(255, 150, 50, 0.5);
 }
 
 /* ===== ПЕРСОНАЖИ ===== */
@@ -1330,6 +1399,294 @@ kbd {
     opacity: 1;
 }
 
+/* ===== TUTORIAL ===== */
+.tutorial-message {
+    position: absolute;
+    top: 120px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.9);
+    padding: 20px 40px;
+    border-radius: 15px;
+    border: 2px solid #667eea;
+    font-size: 1.2rem;
+    max-width: 80%;
+    text-align: center;
+    z-index: 200;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.tutorial-message.show {
+    opacity: 1;
+}
+
+/* ===== DOMAIN BUTTON ===== */
+.domain-button {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(135deg, #00bfff, #0066ff);
+    border: 4px solid #fff;
+    border-radius: 20px;
+    padding: 30px 50px;
+    cursor: pointer;
+    z-index: 300;
+    animation: domainPulse 1s ease-in-out infinite;
+    text-align: center;
+    box-shadow: 0 0 50px rgba(0, 191, 255, 0.5);
+}
+
+.domain-button:hover {
+    transform: translate(-50%, -50%) scale(1.05);
+}
+
+.domain-button:active {
+    transform: translate(-50%, -50%) scale(0.98);
+}
+
+.domain-button .domain-text {
+    display: block;
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.domain-button .domain-name {
+    display: block;
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 0 20px #00bfff;
+}
+
+@keyframes domainPulse {
+    0%, 100% {
+        box-shadow: 0 0 30px #00bfff;
+    }
+    50% {
+        box-shadow: 0 0 60px #00bfff, 0 0 100px #0066ff;
+    }
+}
+
+/* ===== DOMAIN CLASH ===== */
+.domain-clash {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.95);
+    padding: 40px;
+    border-radius: 20px;
+    border: 3px solid #ff0066;
+    z-index: 400;
+    text-align: center;
+    min-width: 380px;
+    box-shadow: 0 0 50px rgba(255, 0, 102, 0.5);
+}
+
+.clash-title {
+    font-size: 2rem;
+    font-weight: bold;
+    background: linear-gradient(45deg, #00bfff, #ff0066);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 25px;
+    animation: clashGlow 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes clashGlow {
+    from {
+        filter: brightness(1);
+    }
+    to {
+        filter: brightness(1.3);
+    }
+}
+
+.clash-bars {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.clash-bar {
+    flex: 1;
+    height: 35px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 17px;
+    overflow: hidden;
+}
+
+.gojo-bar {
+    border: 3px solid #00bfff;
+}
+
+.sukuna-bar {
+    border: 3px solid #ff0000;
+}
+
+.clash-fill {
+    height: 100%;
+    transition: width 0.1s ease;
+    border-radius: 15px;
+}
+
+.gojo-fill {
+    background: linear-gradient(90deg, #00bfff, #0066ff);
+    width: 50%;
+}
+
+.sukuna-fill {
+    background: linear-gradient(90deg, #ff0000, #ff6600);
+    width: 50%;
+    float: right;
+}
+
+.clash-vs {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 0 10px #fff;
+}
+
+.clash-score {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.clash-score span:first-child {
+    color: #00bfff;
+    text-shadow: 0 0 15px #00bfff;
+}
+
+.clash-score span:last-child {
+    color: #ff0000;
+    text-shadow: 0 0 15px #ff0000;
+}
+
+.clash-timer {
+    font-size: 4rem;
+    font-weight: bold;
+    color: #ffcc00;
+    margin-bottom: 25px;
+    text-shadow: 0 0 20px #ffcc00;
+}
+
+.clash-button {
+    background: linear-gradient(135deg, #ff0066, #ff6600);
+    border: 4px solid #fff;
+    border-radius: 50%;
+    width: 150px;
+    height: 150px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #fff;
+    cursor: pointer;
+    transition: transform 0.05s ease;
+    margin-bottom: 15px;
+    box-shadow: 0 0 30px rgba(255, 0, 102, 0.5);
+}
+
+.clash-button:hover {
+    box-shadow: 0 0 50px rgba(255, 0, 102, 0.8);
+}
+
+.clash-button:active,
+.clash-button.pressed {
+    transform: scale(0.95);
+    background: linear-gradient(135deg, #cc0055, #cc5500);
+}
+
+.clash-hint {
+    font-size: 0.9rem;
+    color: #888;
+}
+
+/* ===== CLASH RESULT ===== */
+.clash-result {
+    padding: 30px;
+}
+
+.clash-result .result-title {
+    font-size: 3rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.clash-result.win .result-title {
+    color: #00ff88;
+    text-shadow: 0 0 30px #00ff88;
+}
+
+.clash-result.lose .result-title {
+    color: #ff4444;
+    text-shadow: 0 0 30px #ff4444;
+}
+
+.result-score {
+    font-size: 2rem;
+    margin: 20px 0;
+    color: #fff;
+}
+
+.result-text {
+    font-size: 1.1rem;
+    color: #aaa;
+}
+
+/* ===== PLAY MODAL ===== */
+.play-modal {
+    max-width: 500px;
+}
+
+.play-modal p {
+    color: #888;
+    margin-bottom: 25px;
+    font-size: 1.1rem;
+}
+
+.play-options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.play-options .menu-btn {
+    display: flex;
+    flex-direction: column;
+    padding: 25px;
+    align-items: center;
+}
+
+.play-options .menu-btn span {
+    font-size: 1.3rem;
+}
+
+.play-options .menu-btn small {
+    font-size: 0.85rem;
+    opacity: 0.7;
+    margin-top: 8px;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+.tutorial-btn {
+    background: linear-gradient(135deg, #00bfff, #0066ff) !important;
+}
+
+.skip-btn {
+    background: linear-gradient(135deg, #ff6600, #ff0066) !important;
+}
+
 /* ===== СКРОЛЛБАР ===== */
 ::-webkit-scrollbar {
     width: 8px;
@@ -1345,6 +1702,10 @@ kbd {
     border-radius: 4px;
 }
 
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #764ba2, #667eea);
+}
+
 /* ===== АДАПТИВНОСТЬ ===== */
 @media (max-width: 768px) {
     .menu-content,
@@ -1353,81 +1714,145 @@ kbd {
         padding: 25px 20px;
         margin: 10px;
     }
-    
+
     .menu-btn {
         padding: 15px 30px;
         font-size: 1.1rem;
     }
-    
+
     .characters-grid {
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     }
-    
+
     .setting-item {
         flex-direction: column;
         align-items: flex-start;
     }
-    
+
     .setting-control {
         width: 100%;
         justify-content: flex-end;
     }
-    
+
     input[type="range"] {
         width: 120px;
     }
-    
+
     .profile-header {
         flex-direction: column;
         text-align: center;
     }
-    
+
     .profile-main-info {
         text-align: center;
     }
-    
+
     .xp-bar {
         width: 100%;
     }
-    
+
     .social-auth {
         flex-direction: column;
     }
-    
+
     .game-controls-hint {
         display: none;
     }
-    
+
     .mobile-controls {
         display: block;
     }
-    
+
     .game-hud {
-        top: 80px;
+        top: 70px;
     }
-    
+
     .hud-player,
     .hud-enemy {
-        width: 150px;
+        width: 140px;
     }
-    
+
+    .hud-health-bar {
+        height: 18px;
+    }
+
+    .hud-energy-bar {
+        height: 8px;
+    }
+
+    .hud-name {
+        font-size: 0.9rem;
+    }
+
     .hud-timer {
         font-size: 2rem;
-        padding: 5px 15px;
+        padding: 8px 20px;
     }
-    
+
     .game-back {
         top: 10px;
         left: 10px;
         padding: 8px 15px;
         font-size: 0.8rem;
     }
-    
+
     .pause-btn {
         top: 10px;
         right: 10px;
         width: 40px;
         height: 40px;
+        font-size: 1.2rem;
+    }
+
+    .domain-clash {
+        min-width: 90%;
+        padding: 25px;
+    }
+
+    .clash-button {
+        width: 120px;
+        height: 120px;
+        font-size: 1rem;
+    }
+
+    .clash-title {
+        font-size: 1.5rem;
+    }
+
+    .clash-timer {
+        font-size: 3rem;
+    }
+
+    .clash-score {
+        font-size: 2rem;
+    }
+
+    .tutorial-message {
+        font-size: 1rem;
+        padding: 15px 25px;
+        max-width: 90%;
+    }
+
+    .domain-button {
+        padding: 20px 30px;
+        width: 90%;
+        max-width: 350px;
+    }
+
+    .domain-button .domain-name {
+        font-size: 1.4rem;
+    }
+
+    .domain-button .domain-text {
+        font-size: 0.85rem;
+    }
+
+    .play-modal {
+        max-width: 95%;
+    }
+
+    .play-options .menu-btn {
+        padding: 20px;
     }
 }
 
@@ -1435,38 +1860,94 @@ kbd {
     .game-title {
         margin-bottom: 25px;
     }
-    
+
     .menu-btn {
         padding: 12px 25px;
         font-size: 1rem;
     }
-    
+
     .characters-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .user-profile {
         flex-wrap: wrap;
         justify-content: center;
         text-align: center;
     }
-    
+
     .user-info {
         text-align: center;
         width: 100%;
     }
-    
+
     .loading-bar {
         width: 250px;
     }
+
+    .hud-player,
+    .hud-enemy {
+        width: 110px;
+    }
+
+    .hud-timer {
+        font-size: 1.5rem;
+        padding: 5px 15px;
+    }
+
+    .action-btn {
+        width: 55px;
+        height: 55px;
+        font-size: 1.3rem;
+    }
+
+    .joystick {
+        width: 100px;
+        height: 100px;
+    }
+
+    .joystick-knob {
+        width: 40px;
+        height: 40px;
+    }
+
+    .clash-button {
+        width: 100px;
+        height: 100px;
+        font-size: 0.9rem;
+    }
+
+    .clash-timer {
+        font-size: 2.5rem;
+    }
+
+    .clash-title {
+        font-size: 1.2rem;
+    }
+
+    .profile-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .stat-card {
+        padding: 15px;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+    }
+
+    .controls-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
-/* Мобильные устройства с тачем */
+/* ===== МОБИЛЬНЫЕ С ТАЧЕМ ===== */
 @media (hover: none) and (pointer: coarse) {
     .mobile-controls {
         display: block;
     }
-    
+
     .game-controls-hint {
         display: none;
     }
@@ -1488,4 +1969,88 @@ kbd {
 .screen.active .screen-content,
 .screen.active .auth-container {
     animation: fadeIn 0.5s ease;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.shake {
+    animation: shake 0.3s ease;
+}
+
+@keyframes glow {
+    0%, 100% {
+        box-shadow: 0 0 20px currentColor;
+    }
+    50% {
+        box-shadow: 0 0 40px currentColor, 0 0 60px currentColor;
+    }
+}
+
+/* ===== ЭФФЕКТЫ ДЛЯ DOMAIN ===== */
+@keyframes domainBackground {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.domain-active {
+    animation: domainBackground 3s ease infinite;
+    background-size: 200% 200%;
+}
+
+/* ===== LANDSCAPE MOBILE ===== */
+@media (max-height: 500px) and (orientation: landscape) {
+    .game-hud {
+        top: 10px;
+    }
+
+    .hud-player,
+    .hud-enemy {
+        width: 120px;
+    }
+
+    .hud-timer {
+        font-size: 1.5rem;
+        padding: 5px 15px;
+    }
+
+    .tutorial-message {
+        top: 60px;
+        font-size: 0.9rem;
+        padding: 10px 20px;
+    }
+
+    .domain-clash {
+        padding: 20px;
+        min-width: auto;
+        width: 80%;
+    }
+
+    .clash-button {
+        width: 80px;
+        height: 80px;
+        font-size: 0.8rem;
+    }
+
+    .clash-timer {
+        font-size: 2rem;
+        margin-bottom: 15px;
+    }
+}
+
+/* ===== ПЕЧАТЬ (отключаем) ===== */
+@media print {
+    body {
+        display: none;
+    }
 }
