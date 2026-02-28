@@ -1,0 +1,287 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    overflow: hidden;
+    background: #000;
+    color: #fff;
+}
+
+/* Меню */
+.menu-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
+
+#menuBackground {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+.menu-content {
+    text-align: center;
+    z-index: 10;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 40px;
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.game-title {
+    font-size: 4rem;
+    font-weight: bold;
+    background: linear-gradient(45deg, #ff0080, #7928ca, #ff0080);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 200% 200%;
+    animation: gradientShift 3s ease infinite;
+    text-shadow: 0 0 30px rgba(255, 0, 128, 0.5);
+    margin-bottom: 50px;
+}
+
+@keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+.menu-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.menu-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    padding: 20px 60px;
+    font-size: 1.5rem;
+    color: white;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+    position: relative;
+    overflow: hidden;
+}
+
+.menu-btn:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
+}
+
+.menu-btn:active {
+    transform: translateY(-2px) scale(1.02);
+}
+
+.menu-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.2);
+    transition: left 0.5s;
+}
+
+.menu-btn:hover::before {
+    left: 100%;
+}
+
+/* Игровой контейнер */
+.game-container {
+    width: 100%;
+    height: 100vh;
+    position: relative;
+}
+
+#gameCanvas {
+    width: 100%;
+    height: 100%;
+}
+
+/* UI игры */
+.game-ui {
+    position: absolute;
+    top: 20px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 40px;
+    z-index: 10;
+}
+
+.health-bar {
+    width: 400px;
+    height: 40px;
+    background: rgba(0, 0, 0, 0.7);
+    border: 3px solid #fff;
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+}
+
+.health-bar.enemy {
+    transform: scaleX(-1);
+}
+
+.health-fill {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #00ff00, #ffff00, #ff0000);
+    transition: width 0.3s ease;
+}
+
+.health-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: bold;
+    font-size: 1.2rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.timer {
+    font-size: 3rem;
+    font-weight: bold;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 10px 30px;
+    border-radius: 15px;
+    border: 3px solid #fff;
+}
+
+/* Мобильные кнопки */
+.mobile-controls {
+    display: none;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 20px;
+    z-index: 10;
+}
+
+.joystick-container {
+    position: absolute;
+    bottom: 30px;
+    left: 30px;
+}
+
+.joystick {
+    width: 120px;
+    height: 120px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 3px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    position: relative;
+}
+
+.joystick-knob {
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    transition: all 0.1s;
+}
+
+.action-buttons {
+    position: absolute;
+    bottom: 30px;
+    right: 30px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.action-btn {
+    width: 70px;
+    height: 70px;
+    background: rgba(102, 126, 234, 0.8);
+    border: 3px solid #fff;
+    border-radius: 50%;
+    font-size: 2rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.action-btn:active {
+    transform: scale(0.9);
+    background: rgba(102, 126, 234, 1);
+}
+
+.pause-btn {
+    position: absolute;
+    top: 100px;
+    right: 40px;
+    width: 60px;
+    height: 60px;
+    background: rgba(0, 0, 0, 0.7);
+    border: 3px solid #fff;
+    border-radius: 50%;
+    font-size: 2rem;
+    cursor: pointer;
+    z-index: 10;
+}
+
+/* Адаптив */
+@media (max-width: 768px) {
+    .game-title {
+        font-size: 2.5rem;
+    }
+    
+    .menu-btn {
+        padding: 15px 40px;
+        font-size: 1.2rem;
+    }
+    
+    .menu-content {
+        padding: 20px;
+    }
+    
+    .mobile-controls {
+        display: block;
+    }
+    
+    .health-bar {
+        width: 150px;
+        height: 30px;
+    }
+    
+    .game-ui {
+        padding: 0 10px;
+    }
+    
+    .timer {
+        font-size: 2rem;
+        padding: 5px 15px;
+    }
+}
+
+@media (hover: none) {
+    .mobile-controls {
+        display: block;
+    }
+}
