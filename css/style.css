@@ -10,6 +10,9 @@ body {
     background: #0a0a0f;
     color: #fff;
     min-height: 100vh;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
 }
 
 /* 3D Фон */
@@ -364,18 +367,9 @@ body {
     border-color: rgba(255, 255, 255, 0.3);
 }
 
-.social-auth-btn.google:hover {
-    border-color: #ea4335;
-}
-
-.social-auth-btn.guest:hover {
-    border-color: #667eea;
-}
-
-.social-auth-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
+.social-auth-btn.google:hover { border-color: #ea4335; }
+.social-auth-btn.guest:hover { border-color: #667eea; }
+.social-auth-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* Переключение */
 .auth-switch {
@@ -678,7 +672,7 @@ body {
     box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
 }
 
-/* ===== ОСТАЛЬНЫЕ СТИЛИ ===== */
+/* ===== МЕНЮ ===== */
 .menu-content,
 .screen-content {
     text-align: center;
@@ -783,6 +777,223 @@ body {
 .back-btn:hover {
     background: rgba(255, 255, 255, 0.2);
     transform: translateX(-5px);
+}
+
+/* ===== ИГРОВОЙ ЭКРАН ===== */
+#gameScreen {
+    background: #000;
+}
+
+#gameContainer {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+/* HUD */
+.game-hud {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    z-index: 100;
+    pointer-events: none;
+}
+
+.hud-player,
+.hud-enemy {
+    width: 250px;
+}
+
+.hud-enemy {
+    text-align: right;
+}
+
+.hud-name {
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #fff;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+}
+
+.hud-health-bar,
+.hud-energy-bar {
+    height: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+
+.hud-energy-bar {
+    height: 10px;
+}
+
+.hud-health-fill {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, #ff0000, #ff6600, #00ff00);
+    transition: width 0.3s ease;
+}
+
+.hud-energy-fill {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, #0066ff, #00d4ff);
+    transition: width 0.3s ease;
+}
+
+.hud-timer {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    background: rgba(0, 0, 0, 0.5);
+    padding: 10px 25px;
+    border-radius: 15px;
+    border: 3px solid #fff;
+}
+
+/* Подсказки управления */
+.game-controls-hint {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    color: #888;
+    z-index: 100;
+}
+
+/* Кнопки в игре */
+.game-back {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 101;
+    margin: 0;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+}
+
+.pause-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid #fff;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    cursor: pointer;
+    z-index: 101;
+    transition: all 0.3s ease;
+}
+
+.pause-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Мобильное управление */
+.mobile-controls {
+    display: none;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 20px;
+    z-index: 100;
+    pointer-events: none;
+}
+
+.joystick-area {
+    position: absolute;
+    bottom: 30px;
+    left: 30px;
+    pointer-events: auto;
+}
+
+.joystick {
+    width: 120px;
+    height: 120px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    position: relative;
+}
+
+.joystick-knob {
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    transition: all 0.1s ease;
+}
+
+.action-buttons {
+    position: absolute;
+    bottom: 30px;
+    right: 30px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    pointer-events: auto;
+}
+
+.action-btn {
+    width: 60px;
+    height: 60px;
+    background: rgba(102, 126, 234, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.action-btn:active {
+    transform: scale(0.9);
+    background: rgba(102, 126, 234, 0.8);
+}
+
+.jump-btn {
+    grid-column: 2;
+}
+
+.block-btn {
+    grid-column: 1;
+    grid-row: 2;
+}
+
+.punch-btn {
+    grid-column: 2;
+    grid-row: 2;
+}
+
+.kick-btn {
+    grid-column: 3;
+    grid-row: 2;
+}
+
+.special-btn {
+    grid-column: 3;
+    grid-row: 1;
+    background: rgba(255, 215, 0, 0.5);
 }
 
 /* ===== ПЕРСОНАЖИ ===== */
@@ -1098,31 +1309,6 @@ kbd {
     margin: 5px 0;
 }
 
-.social-links {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin-top: 20px;
-}
-
-.social-btn {
-    width: 50px;
-    height: 50px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    text-decoration: none;
-    transition: all 0.3s ease;
-}
-
-.social-btn:hover {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    transform: translateY(-3px);
-}
-
 /* ===== УВЕДОМЛЕНИЕ ===== */
 .notification {
     position: fixed;
@@ -1159,10 +1345,6 @@ kbd {
     border-radius: 4px;
 }
 
-::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, #764ba2, #667eea);
-}
-
 /* ===== АДАПТИВНОСТЬ ===== */
 @media (max-width: 768px) {
     .menu-content,
@@ -1179,10 +1361,6 @@ kbd {
     
     .characters-grid {
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    }
-    
-    .character-image {
-        font-size: 3rem;
     }
     
     .setting-item {
@@ -1216,12 +1394,40 @@ kbd {
         flex-direction: column;
     }
     
-    .controls-grid {
-        grid-template-columns: repeat(2, 1fr);
+    .game-controls-hint {
+        display: none;
     }
     
-    .profile-stats {
-        grid-template-columns: repeat(2, 1fr);
+    .mobile-controls {
+        display: block;
+    }
+    
+    .game-hud {
+        top: 80px;
+    }
+    
+    .hud-player,
+    .hud-enemy {
+        width: 150px;
+    }
+    
+    .hud-timer {
+        font-size: 2rem;
+        padding: 5px 15px;
+    }
+    
+    .game-back {
+        top: 10px;
+        left: 10px;
+        padding: 8px 15px;
+        font-size: 0.8rem;
+    }
+    
+    .pause-btn {
+        top: 10px;
+        right: 10px;
+        width: 40px;
+        height: 40px;
     }
 }
 
@@ -1253,19 +1459,16 @@ kbd {
     .loading-bar {
         width: 250px;
     }
-    
-    .auth-container {
-        padding: 30px 20px;
+}
+
+/* Мобильные устройства с тачем */
+@media (hover: none) and (pointer: coarse) {
+    .mobile-controls {
+        display: block;
     }
     
-    .avatar-options {
-        gap: 8px;
-    }
-    
-    .avatar-option {
-        width: 45px;
-        height: 45px;
-        font-size: 1.3rem;
+    .game-controls-hint {
+        display: none;
     }
 }
 
