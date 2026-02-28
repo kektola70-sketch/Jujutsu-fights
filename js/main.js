@@ -1,8 +1,8 @@
-// ===== ИМПОРТЫ FIREBASE =====
+// ===== FIREBASE CONFIG =====
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
 import { 
-    auth, 
-    db,
-    createUserWithEmailAndPassword,
+    getAuth, 
+    createUserWithEmailAndPassword, 
     signInWithEmailAndPassword,
     signInWithPopup,
     signInAnonymously,
@@ -14,71 +14,654 @@ import {
     updatePassword,
     reauthenticateWithCredential,
     EmailAuthProvider,
-    sendEmailVerification,
-    collection,
-    doc,
-    getDoc,
-    setDoc,
+    sendEmailVerification 
+} from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+import { 
+    getFirestore, 
+    doc, 
+    getDoc, 
+    setDoc, 
     updateDoc,
-    query,
-    where,
-    orderBy,
-    limit,
-    getDocs,
-    serverTimestamp,
-    runTransaction
-} from './firebase-config.js';
+    serverTimestamp 
+} from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
-// ===== КЛАСС АВТОРИЗАЦИИ С FIREBASE =====
+// Firebase Config
+const firebaseConfig = {
+    apiKey: "AIzaSyD6ReDa8vH044Yun5CkkzGNISuMDp4rtW8",
+    authDomain: "jujutsu-fight.firebaseapp.com",
+    projectId: "jujutsu-fight",
+    storageBucket: "jujutsu-fight.firebasestorage.app",
+    messagingSenderId: "506548974802",
+    appId: "1:506548974802:web:3ac719e1381d561973290b"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// ===== CHARACTER CLASS =====
+class Character {
+    constructor(scene, options = {}) {
+        this.scene = scene;
+        this.name = options.name || 'Character';
+        this.color = options.color || 0x0066ff;
+        this.secondaryColor = options.secondaryColor || 0x003399;
+        this.skinColor = options.skinColor || 0xffdbac;
+        this.hairColor = options.hairColor || 0x222222;
+        this.position = options.position || { x: 0, y: 0, z: 0 };
+        
+        this.health = 100;
+        this.energy = 100;
+        this.isAlive = true;
+        this.isBlocking = false;
+        this.isAttacking = false;
+        this.isJumping = false;
+        this.direction = 1;
+        
+        this.velocity = { x: 0, y: 0, z: 0 };
+        this.gravity = -25;
+        this.jumpForce = 10;
+        this.moveSpeed = 5;
+        
+        this.bodyParts = {};
+        this.mesh = new THREE.Group();
+        this.mesh.position.set(this.position.x, this.position.y, this.position.z);
+        
+        this.createModel();
+        this.scene.add(this.mesh);
+        
+        this.animationTime = 0;
+        this.currentAnimation = 'idle';
+    }
+    
+    createModel() {
+        // Тело
+        const torsoGeo = new THREE.BoxGeometry(0.8, 1.0, 0.4);
+        const torsoMat = new THREE.MeshStandardMaterial({ color: this.color, roughness: 0.7 });
+        this.bodyParts.torso = new THREE.Mesh(torsoGeo, torsoMat);
+        this.bodyParts.torso.position.y = 1.5;
+        this.bodyParts.torso.castShadow = true;
+        this.mesh.add(this.bodyParts.torso);
+        
+        // Голова
+        const headGroup = new THREE.Group();
+        headGroup.position.y = 2.3;
+        
+        const headGeo = new THREE.SphereGeometry(0.28, 32, 32);
+        const headMat = new THREE.MeshStandardMaterial({ color: this.skinColor });
+        this.bodyParts.head = new THREE.Mesh(headGeo, headMat);
+        this.bodyParts.head.castShadow = true;
+        headGroup.add(this.bodyParts.head);
+        
+        // Волосы
+        const hairGeo = new THREE.SphereGeometry(0.30, 32, 32, 0, Math.PI * 2, 0, Math.PI / 2);
+        const hairMat = new THREE.MeshStandardMaterial({ color: this.hairColor });
+        this.bodyParts.hair = new THREE.Mesh(hairGeo, hairMat);
+        this.bodyParts.hair.position.y = 0.05;
+        headGroup.add(this.bodyParts.hair);
+        
+        // Глаза
+        const eyeGeo = new THREE.SphereGeometry(0.05, 16, 16);
+        const eyeMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+        const pupilGeo = new THREE.SphereGeometry(0.025, 16, 16);
+        const pupilMat = new THREE.MeshStandardMaterial({ color: 0x000000 });
+        
+        const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
+        leftEye.position.set(-0.1, 0.05, 0.23);
+        headGroup.add(leftEye);
+        
+        const leftPupil = new THREE.Mesh(pupilGeo, pupilMat);
+        leftPupil.position.set(-0.1, 0.05, 0.27);
+        headGroup.add(leftPupil);
+        
+        const rightEye = new THREE.Mesh(eyeGeo, eyeMat);
+        rightEye.position.set(0.1, 0.05, 0.23);
+        headGroup.add(rightEye);
+        
+        const rightPupil = new THREE.Mesh(pupilGeo, pupilMat);
+        rightPupil.position.set(0.1, 0.05, 0.27);
+        headGroup.add(rightPupil);
+        
+        this.bodyParts.headGroup = headGroup;
+        this.mesh.add(headGroup);
+        
+        // Руки
+        this.bodyParts.leftArmGroup = this.createArm(-0.5);
+        this.bodyParts.rightArmGroup = this.createArm(0.5);
+        
+        // Пояс
+        const beltGeo = new THREE.BoxGeometry(0.85, 0.15, 0.45);
+        const beltMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
+        this.bodyParts.belt = new THREE.Mesh(beltGeo, beltMat);
+        this.bodyParts.belt.position.y = 0.95;
+        this.mesh.add(this.bodyParts.belt);
+        
+        // Ноги
+        this.bodyParts.leftLegGroup = this.createLeg(-0.2);
+        this.bodyParts.rightLegGroup = this.createLeg(0.2);
+        
+        // Аура
+        const auraGeo = new THREE.SphereGeometry(1.2, 32, 32);
+        const auraMat = new THREE.MeshBasicMaterial({
+            color: this.color,
+            transparent: true,
+            opacity: 0,
+            side: THREE.BackSide
+        });
+        this.bodyParts.aura = new THREE.Mesh(auraGeo, auraMat);
+        this.bodyParts.aura.position.y = 1.5;
+        this.mesh.add(this.bodyParts.aura);
+    }
+    
+    createArm(xPos) {
+        const group = new THREE.Group();
+        group.position.set(xPos, 1.9, 0);
+        
+        const armMat = new THREE.MeshStandardMaterial({ color: this.color });
+        const skinMat = new THREE.MeshStandardMaterial({ color: this.skinColor });
+        
+        const upperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.12, 0.5, 16), armMat);
+        upperArm.position.y = -0.3;
+        upperArm.castShadow = true;
+        group.add(upperArm);
+        
+        const elbow = new THREE.Mesh(new THREE.SphereGeometry(0.1, 16, 16), armMat);
+        elbow.position.y = -0.55;
+        group.add(elbow);
+        
+        const forearm = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 0.45, 16), skinMat);
+        forearm.position.y = -0.8;
+        forearm.castShadow = true;
+        group.add(forearm);
+        
+        const fist = new THREE.Mesh(new THREE.SphereGeometry(0.1, 16, 16), skinMat);
+        fist.position.y = -1.05;
+        fist.castShadow = true;
+        group.add(fist);
+        
+        this.mesh.add(group);
+        return group;
+    }
+    
+    createLeg(xPos) {
+        const group = new THREE.Group();
+        group.position.set(xPos, 0.85, 0);
+        
+        const legMat = new THREE.MeshStandardMaterial({ color: this.secondaryColor });
+        const footMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
+        
+        const thigh = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.15, 0.5, 16), legMat);
+        thigh.position.y = -0.3;
+        thigh.castShadow = true;
+        group.add(thigh);
+        
+        const knee = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), legMat);
+        knee.position.y = -0.55;
+        group.add(knee);
+        
+        const shin = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.12, 0.5, 16), legMat);
+        shin.position.y = -0.85;
+        shin.castShadow = true;
+        group.add(shin);
+        
+        const foot = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.1, 0.3), footMat);
+        foot.position.set(0, -1.15, 0.05);
+        foot.castShadow = true;
+        group.add(foot);
+        
+        this.mesh.add(group);
+        return group;
+    }
+    
+    update(delta) {
+        this.animationTime += delta;
+        
+        // Гравитация
+        if (this.mesh.position.y > 0 || this.velocity.y > 0) {
+            this.velocity.y += this.gravity * delta;
+            this.mesh.position.y += this.velocity.y * delta;
+            
+            if (this.mesh.position.y <= 0) {
+                this.mesh.position.y = 0;
+                this.velocity.y = 0;
+                this.isJumping = false;
+            }
+        }
+        
+        this.mesh.position.x += this.velocity.x * delta;
+        this.mesh.position.z += this.velocity.z * delta;
+        
+        // Анимации
+        switch (this.currentAnimation) {
+            case 'idle': this.animateIdle(); break;
+            case 'walk': this.animateWalk(); break;
+            case 'run': this.animateRun(); break;
+            case 'jump': this.animateJump(); break;
+            case 'punch': this.animatePunch(); break;
+            case 'kick': this.animateKick(); break;
+            case 'special': this.animateSpecial(); break;
+            case 'block': this.animateBlock(); break;
+        }
+    }
+    
+    animateIdle() {
+        const breathe = Math.sin(this.animationTime * 2) * 0.02;
+        this.bodyParts.torso.position.y = 1.5 + breathe;
+        this.bodyParts.headGroup.position.y = 2.3 + breathe;
+        
+        this.bodyParts.leftArmGroup.rotation.z = 0.3;
+        this.bodyParts.rightArmGroup.rotation.z = -0.3;
+        this.bodyParts.leftArmGroup.rotation.x = -0.5;
+        this.bodyParts.rightArmGroup.rotation.x = -0.5;
+    }
+    
+    animateWalk() {
+        const swing = Math.sin(this.animationTime * 8) * 0.5;
+        this.bodyParts.leftLegGroup.rotation.x = swing;
+        this.bodyParts.rightLegGroup.rotation.x = -swing;
+        this.bodyParts.leftArmGroup.rotation.x = -swing * 0.6 - 0.3;
+        this.bodyParts.rightArmGroup.rotation.x = swing * 0.6 - 0.3;
+    }
+    
+    animateRun() {
+        const swing = Math.sin(this.animationTime * 12) * 0.7;
+        this.bodyParts.leftLegGroup.rotation.x = swing;
+        this.bodyParts.rightLegGroup.rotation.x = -swing;
+        this.bodyParts.leftArmGroup.rotation.x = -swing * 0.8 - 0.5;
+        this.bodyParts.rightArmGroup.rotation.x = swing * 0.8 - 0.5;
+        this.bodyParts.torso.rotation.x = 0.1;
+    }
+    
+    animateJump() {
+        this.bodyParts.leftLegGroup.rotation.x = -0.5;
+        this.bodyParts.rightLegGroup.rotation.x = -0.3;
+        this.bodyParts.leftArmGroup.rotation.x = -1;
+        this.bodyParts.rightArmGroup.rotation.x = -1;
+    }
+    
+    animatePunch() {
+        this.bodyParts.rightArmGroup.rotation.x = -1.5;
+        this.bodyParts.rightArmGroup.rotation.z = 0;
+        this.bodyParts.torso.rotation.y = -0.3 * this.direction;
+    }
+    
+    animateKick() {
+        this.bodyParts.rightLegGroup.rotation.x = 1.2;
+        this.bodyParts.torso.rotation.x = -0.2;
+    }
+    
+    animateSpecial() {
+        const pulse = Math.sin(this.animationTime * 10) * 0.1 + 0.3;
+        this.bodyParts.aura.material.opacity = pulse;
+        this.bodyParts.aura.scale.setScalar(1 + pulse * 0.5);
+        this.bodyParts.leftArmGroup.rotation.x = -1.2;
+        this.bodyParts.rightArmGroup.rotation.x = -1.2;
+    }
+    
+    animateBlock() {
+        this.bodyParts.leftArmGroup.rotation.x = -1.3;
+        this.bodyParts.rightArmGroup.rotation.x = -1.3;
+        this.bodyParts.torso.position.y = 1.3;
+    }
+    
+    setAnimation(name) {
+        if (this.currentAnimation !== name) {
+            this.currentAnimation = name;
+            this.resetPose();
+        }
+    }
+    
+    resetPose() {
+        this.bodyParts.torso.position.y = 1.5;
+        this.bodyParts.torso.rotation.set(0, 0, 0);
+        this.bodyParts.headGroup.position.y = 2.3;
+        this.bodyParts.leftArmGroup.rotation.set(0, 0, 0);
+        this.bodyParts.rightArmGroup.rotation.set(0, 0, 0);
+        this.bodyParts.leftLegGroup.rotation.set(0, 0, 0);
+        this.bodyParts.rightLegGroup.rotation.set(0, 0, 0);
+        this.bodyParts.aura.material.opacity = 0;
+    }
+    
+    move(direction) {
+        this.velocity.x = direction.x * this.moveSpeed;
+        this.velocity.z = direction.z * this.moveSpeed;
+        
+        if (direction.x !== 0) {
+            this.direction = direction.x > 0 ? 1 : -1;
+            this.mesh.rotation.y = direction.x > 0 ? 0 : Math.PI;
+        }
+        
+        if (direction.x !== 0 || direction.z !== 0) {
+            this.setAnimation('walk');
+        } else {
+            this.setAnimation('idle');
+        }
+    }
+    
+    jump() {
+        if (!this.isJumping && this.mesh.position.y <= 0) {
+            this.velocity.y = this.jumpForce;
+            this.isJumping = true;
+            this.setAnimation('jump');
+        }
+    }
+    
+    punch() {
+        if (this.isAttacking) return;
+        this.isAttacking = true;
+        this.setAnimation('punch');
+        setTimeout(() => {
+            this.isAttacking = false;
+            this.setAnimation('idle');
+        }, 300);
+    }
+    
+    kick() {
+        if (this.isAttacking) return;
+        this.isAttacking = true;
+        this.setAnimation('kick');
+        setTimeout(() => {
+            this.isAttacking = false;
+            this.setAnimation('idle');
+        }, 400);
+    }
+    
+    special() {
+        if (this.isAttacking || this.energy < 30) return;
+        this.isAttacking = true;
+        this.energy -= 30;
+        this.setAnimation('special');
+        setTimeout(() => {
+            this.isAttacking = false;
+            this.setAnimation('idle');
+        }, 800);
+    }
+    
+    block(isBlocking) {
+        this.isBlocking = isBlocking;
+        this.setAnimation(isBlocking ? 'block' : 'idle');
+    }
+}
+
+// ===== GAME CLASS =====
+class Game {
+    constructor(container) {
+        this.container = container;
+        this.clock = new THREE.Clock();
+        this.keys = {};
+        this.isRunning = true;
+        
+        this.init();
+    }
+    
+    init() {
+        // Scene
+        this.scene = new THREE.Scene();
+        this.scene.background = new THREE.Color(0x1a1a2e);
+        this.scene.fog = new THREE.Fog(0x1a1a2e, 10, 50);
+        
+        // Camera
+        this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        this.camera.position.set(0, 3, 8);
+        this.camera.lookAt(0, 1.5, 0);
+        
+        // Renderer
+        this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        this.container.appendChild(this.renderer.domElement);
+        
+        this.setupLighting();
+        this.createArena();
+        
+        // Player
+        this.player = new Character(this.scene, {
+            name: 'Игрок',
+            color: 0x0066ff,
+            secondaryColor: 0x003399,
+            hairColor: 0xffffff,
+            position: { x: -3, y: 0, z: 0 }
+        });
+        
+        // Enemy
+        this.enemy = new Character(this.scene, {
+            name: 'Враг',
+            color: 0xff0000,
+            secondaryColor: 0x990000,
+            hairColor: 0x000000,
+            position: { x: 3, y: 0, z: 0 }
+        });
+        this.enemy.mesh.rotation.y = Math.PI;
+        
+        this.setupControls();
+        window.addEventListener('resize', () => this.onResize());
+        
+        this.animate();
+    }
+    
+    setupLighting() {
+        const ambient = new THREE.AmbientLight(0xffffff, 0.4);
+        this.scene.add(ambient);
+        
+        const directional = new THREE.DirectionalLight(0xffffff, 0.8);
+        directional.position.set(5, 10, 5);
+        directional.castShadow = true;
+        directional.shadow.camera.left = -10;
+        directional.shadow.camera.right = 10;
+        directional.shadow.camera.top = 10;
+        directional.shadow.camera.bottom = -10;
+        directional.shadow.mapSize.width = 2048;
+        directional.shadow.mapSize.height = 2048;
+        this.scene.add(directional);
+        
+        const rim = new THREE.DirectionalLight(0x0066ff, 0.3);
+        rim.position.set(-5, 5, -5);
+        this.scene.add(rim);
+    }
+    
+    createArena() {
+        // Floor
+        const floorGeo = new THREE.PlaneGeometry(30, 30);
+        const floorMat = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.8 });
+        const floor = new THREE.Mesh(floorGeo, floorMat);
+        floor.rotation.x = -Math.PI / 2;
+        floor.receiveShadow = true;
+        this.scene.add(floor);
+        
+        // Grid
+        const grid = new THREE.GridHelper(30, 30, 0x555555, 0x444444);
+        this.scene.add(grid);
+        
+        // Arena borders
+        const borderMat = new THREE.MeshStandardMaterial({
+            color: 0xff0066,
+            transparent: true,
+            opacity: 0.3,
+            emissive: 0xff0066,
+            emissiveIntensity: 0.5
+        });
+        
+        const positions = [
+            { x: 0, z: 15, rot: 0 },
+            { x: 0, z: -15, rot: 0 },
+            { x: 15, z: 0, rot: Math.PI / 2 },
+            { x: -15, z: 0, rot: Math.PI / 2 }
+        ];
+        
+        positions.forEach(pos => {
+            const border = new THREE.Mesh(new THREE.PlaneGeometry(30, 5), borderMat);
+            border.position.set(pos.x, 2.5, pos.z);
+            border.rotation.y = pos.rot;
+            this.scene.add(border);
+        });
+    }
+    
+    setupControls() {
+        document.addEventListener('keydown', (e) => {
+            this.keys[e.code] = true;
+            if (e.code === 'KeyJ') this.player.punch();
+            if (e.code === 'KeyK') this.player.kick();
+            if (e.code === 'KeyL') this.player.special();
+            if (e.code === 'Space') { e.preventDefault(); this.player.jump(); }
+            if (e.code === 'ShiftLeft') this.player.block(true);
+        });
+        
+        document.addEventListener('keyup', (e) => {
+            this.keys[e.code] = false;
+            if (e.code === 'ShiftLeft') this.player.block(false);
+        });
+        
+        // Mobile controls
+        this.setupMobileControls();
+    }
+    
+    setupMobileControls() {
+        const joystick = document.getElementById('joystick');
+        const knob = document.getElementById('joystickKnob');
+        
+        if (!joystick) return;
+        
+        let joystickActive = false;
+        
+        const handleJoystick = (e) => {
+            e.preventDefault();
+            const rect = joystick.getBoundingClientRect();
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            let clientX, clientY;
+            if (e.touches) {
+                clientX = e.touches[0].clientX - rect.left;
+                clientY = e.touches[0].clientY - rect.top;
+            } else {
+                clientX = e.clientX - rect.left;
+                clientY = e.clientY - rect.top;
+            }
+            
+            const deltaX = clientX - centerX;
+            const deltaY = clientY - centerY;
+            const distance = Math.min(Math.sqrt(deltaX * deltaX + deltaY * deltaY), centerX - 25);
+            const angle = Math.atan2(deltaY, deltaX);
+            
+            const knobX = Math.cos(angle) * distance;
+            const knobY = Math.sin(angle) * distance;
+            
+            knob.style.transform = `translate(calc(-50% + ${knobX}px), calc(-50% + ${knobY}px))`;
+            
+            this.joystickData = {
+                x: knobX / (centerX - 25),
+                y: knobY / (centerY - 25)
+            };
+        };
+        
+        const resetJoystick = () => {
+            knob.style.transform = 'translate(-50%, -50%)';
+            this.joystickData = null;
+            joystickActive = false;
+        };
+        
+        joystick.addEventListener('touchstart', (e) => { joystickActive = true; handleJoystick(e); });
+        joystick.addEventListener('touchmove', handleJoystick);
+        joystick.addEventListener('touchend', resetJoystick);
+        
+        // Action buttons
+        document.getElementById('btnPunch')?.addEventListener('touchstart', () => this.player.punch());
+        document.getElementById('btnKick')?.addEventListener('touchstart', () => this.player.kick());
+        document.getElementById('btnSpecial')?.addEventListener('touchstart', () => this.player.special());
+        document.getElementById('btnJump')?.addEventListener('touchstart', () => this.player.jump());
+        document.getElementById('btnBlock')?.addEventListener('touchstart', () => this.player.block(true));
+        document.getElementById('btnBlock')?.addEventListener('touchend', () => this.player.block(false));
+    }
+    
+    update(delta) {
+        if (!this.isRunning) return;
+        
+        // Keyboard movement
+        const direction = { x: 0, z: 0 };
+        if (this.keys['KeyW'] || this.keys['ArrowUp']) direction.z = -1;
+        if (this.keys['KeyS'] || this.keys['ArrowDown']) direction.z = 1;
+        if (this.keys['KeyA'] || this.keys['ArrowLeft']) direction.x = -1;
+        if (this.keys['KeyD'] || this.keys['ArrowRight']) direction.x = 1;
+        
+        // Joystick movement
+        if (this.joystickData) {
+            direction.x = this.joystickData.x;
+            direction.z = this.joystickData.y;
+        }
+        
+        this.player.move(direction);
+        this.player.update(delta);
+        this.enemy.update(delta);
+        
+        // Update HUD
+        this.updateHUD();
+        
+        // Camera follow
+        this.camera.position.x = (this.player.mesh.position.x + this.enemy.mesh.position.x) / 2;
+        this.camera.lookAt(
+            (this.player.mesh.position.x + this.enemy.mesh.position.x) / 2,
+            1.5,
+            0
+        );
+    }
+    
+    updateHUD() {
+        const playerHealth = document.getElementById('hudPlayerHealth');
+        const playerEnergy = document.getElementById('hudPlayerEnergy');
+        const enemyHealth = document.getElementById('hudEnemyHealth');
+        const enemyEnergy = document.getElementById('hudEnemyEnergy');
+        
+        if (playerHealth) playerHealth.style.width = this.player.health + '%';
+        if (playerEnergy) playerEnergy.style.width = this.player.energy + '%';
+        if (enemyHealth) enemyHealth.style.width = this.enemy.health + '%';
+        if (enemyEnergy) enemyEnergy.style.width = this.enemy.energy + '%';
+    }
+    
+    animate() {
+        requestAnimationFrame(() => this.animate());
+        const delta = this.clock.getDelta();
+        this.update(delta);
+        this.renderer.render(this.scene, this.camera);
+    }
+    
+    onResize() {
+        this.camera.aspect = window.innerWidth / window.innerHeight;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+    
+    destroy() {
+        this.isRunning = false;
+        this.renderer.dispose();
+        this.container.innerHTML = '';
+    }
+}
+
+// ===== AUTH CLASS =====
 class Auth {
     constructor() {
         this.currentUser = null;
-        this.unsubscribe = null;
-        
-        // Слушаем изменения состояния авторизации
-        this.setupAuthListener();
-    }
-    
-    setupAuthListener() {
-        this.unsubscribe = onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                // Пользователь вошёл
-                await this.loadUserData(user);
-            } else {
-                // Пользователь вышел
-                this.currentUser = null;
-            }
-        });
     }
     
     async loadUserData(firebaseUser) {
         try {
-            // Получаем данные пользователя из Firestore
-            const userDocRef = doc(db, 'users', firebaseUser.uid);
-            const userDoc = await getDoc(userDocRef);
-            
+            const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
             if (userDoc.exists()) {
-                this.currentUser = {
-                    uid: firebaseUser.uid,
-                    email: firebaseUser.email,
-                    emailVerified: firebaseUser.emailVerified,
-                    ...userDoc.data()
-                };
+                this.currentUser = { uid: firebaseUser.uid, email: firebaseUser.email, ...userDoc.data() };
             } else {
-                // Создаём профиль для нового пользователя
                 await this.createUserProfile(firebaseUser);
             }
         } catch (error) {
-            console.error('Ошибка загрузки данных:', error);
+            console.error('Error loading user:', error);
         }
     }
     
     async createUserProfile(firebaseUser) {
-        const username = firebaseUser.displayName || firebaseUser.email.split('@')[0];
-        
+        const username = firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Player';
         const userData = {
-            username: username,
-            email: firebaseUser.email,
+            username,
+            email: firebaseUser.email || '',
             avatar: '👤',
             level: 1,
             xp: 0,
@@ -86,43 +669,21 @@ class Auth {
             wins: 0,
             losses: 0,
             unlockedCharacters: ['gojo', 'itadori', 'megumi'],
-            createdAt: serverTimestamp(),
-            lastLogin: serverTimestamp()
+            createdAt: serverTimestamp()
         };
         
-        try {
-            const userDocRef = doc(db, 'users', firebaseUser.uid);
-            await setDoc(userDocRef, userData);
-            
-            this.currentUser = {
-                uid: firebaseUser.uid,
-                email: firebaseUser.email,
-                emailVerified: firebaseUser.emailVerified,
-                ...userData
-            };
-            
-            console.log('✓ Профиль создан');
-        } catch (error) {
-            console.error('Ошибка создания профиля:', error);
-            throw error;
-        }
+        await setDoc(doc(db, 'users', firebaseUser.uid), userData);
+        this.currentUser = { uid: firebaseUser.uid, ...userData };
     }
     
     async register(email, password, username) {
         try {
-            // Создаём пользователя в Firebase Auth
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
+            const cred = await createUserWithEmailAndPassword(auth, email, password);
+            await updateProfile(cred.user, { displayName: username });
             
-            // Обновляем displayName
-            await updateProfile(user, {
-                displayName: username
-            });
-            
-            // Создаём профиль в Firestore
             const userData = {
-                username: username,
-                email: email,
+                username,
+                email,
                 avatar: '👤',
                 level: 1,
                 xp: 0,
@@ -130,102 +691,43 @@ class Auth {
                 wins: 0,
                 losses: 0,
                 unlockedCharacters: ['gojo', 'itadori', 'megumi'],
-                createdAt: serverTimestamp(),
-                lastLogin: serverTimestamp()
+                createdAt: serverTimestamp()
             };
             
-            const userDocRef = doc(db, 'users', user.uid);
-            await setDoc(userDocRef, userData);
+            await setDoc(doc(db, 'users', cred.user.uid), userData);
+            await sendEmailVerification(cred.user);
             
-            // Отправляем письмо подтверждения
-            await sendEmailVerification(user);
-            
-            return { 
-                success: true, 
-                message: 'Регистрация успешна! Проверьте email для подтверждения.' 
-            };
-            
+            return { success: true, message: 'Регистрация успешна!' };
         } catch (error) {
-            console.error('Ошибка регистрации:', error);
-            return { 
-                success: false, 
-                error: this.getErrorMessage(error.code) 
-            };
+            return { success: false, error: this.getErrorMessage(error.code) };
         }
     }
     
     async login(email, password) {
         try {
-            const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            
-            // Обновляем время последнего входа
-            const userDocRef = doc(db, 'users', userCredential.user.uid);
-            await updateDoc(userDocRef, {
-                lastLogin: serverTimestamp()
-            });
-            
+            await signInWithEmailAndPassword(auth, email, password);
             return { success: true };
-            
         } catch (error) {
-            console.error('Ошибка входа:', error);
-            return { 
-                success: false, 
-                error: this.getErrorMessage(error.code) 
-            };
+            return { success: false, error: this.getErrorMessage(error.code) };
         }
     }
     
     async loginWithGoogle() {
         try {
             const provider = new GoogleAuthProvider();
-            provider.setCustomParameters({
-                prompt: 'select_account'
-            });
-            
-            const result = await signInWithPopup(auth, provider);
-            
-            // Проверяем, есть ли профиль
-            const userDocRef = doc(db, 'users', result.user.uid);
-            const userDoc = await getDoc(userDocRef);
-            
-            if (!userDoc.exists()) {
-                // Создаём профиль для нового пользователя Google
-                await this.createUserProfile(result.user);
-            } else {
-                // Обновляем время входа
-                await updateDoc(userDocRef, {
-                    lastLogin: serverTimestamp()
-                });
-            }
-            
+            await signInWithPopup(auth, provider);
             return { success: true };
-            
         } catch (error) {
-            console.error('Ошибка входа через Google:', error);
-            
-            // Обработка специфичных ошибок popup
-            if (error.code === 'auth/popup-closed-by-user') {
-                return { success: false, error: 'Окно входа было закрыто' };
-            }
-            if (error.code === 'auth/cancelled-popup-request') {
-                return { success: false, error: 'Запрос отменён' };
-            }
-            
-            return { 
-                success: false, 
-                error: this.getErrorMessage(error.code) 
-            };
+            return { success: false, error: this.getErrorMessage(error.code) };
         }
     }
     
     async loginAsGuest() {
         try {
-            const userCredential = await signInAnonymously(auth);
-            
-            // Создаём временный профиль
+            const cred = await signInAnonymously(auth);
             const guestData = {
                 username: 'Гость_' + Math.floor(Math.random() * 10000),
-                email: 'guest@anonymous.com',
+                email: '',
                 avatar: '👤',
                 level: 1,
                 xp: 0,
@@ -237,220 +739,70 @@ class Auth {
                 createdAt: serverTimestamp()
             };
             
-            const userDocRef = doc(db, 'users', userCredential.user.uid);
-            await setDoc(userDocRef, guestData);
-            
+            await setDoc(doc(db, 'users', cred.user.uid), guestData);
             return { success: true };
-            
         } catch (error) {
-            console.error('Ошибка гостевого входа:', error);
-            return { 
-                success: false, 
-                error: 'Не удалось войти как гость' 
-            };
+            return { success: false, error: 'Ошибка гостевого входа' };
         }
     }
     
     async logout() {
-        try {
-            await signOut(auth);
-            this.currentUser = null;
-            return { success: true };
-        } catch (error) {
-            console.error('Ошибка выхода:', error);
-            return { success: false, error: 'Ошибка выхода' };
-        }
+        await signOut(auth);
+        this.currentUser = null;
     }
     
     async resetPassword(email) {
         try {
             await sendPasswordResetEmail(auth, email);
-            return { 
-                success: true, 
-                message: 'Инструкции отправлены на email' 
-            };
+            return { success: true, message: 'Письмо отправлено!' };
         } catch (error) {
-            console.error('Ошибка сброса пароля:', error);
-            return { 
-                success: false, 
-                error: this.getErrorMessage(error.code) 
-            };
+            return { success: false, error: this.getErrorMessage(error.code) };
         }
     }
     
-    async updateProfile(updates) {
-        if (!this.currentUser) return { success: false, error: 'Не авторизован' };
-        
-        try {
-            const uid = this.currentUser.uid;
-            
-            // Обновляем в Firestore
-            const userDocRef = doc(db, 'users', uid);
-            await updateDoc(userDocRef, updates);
-            
-            // Обновляем локальные данные
-            Object.assign(this.currentUser, updates);
-            
-            // Если обновляется username, обновляем и в Firebase Auth
-            if (updates.username && auth.currentUser) {
-                await updateProfile(auth.currentUser, {
-                    displayName: updates.username
-                });
-            }
-            
-            return { success: true };
-            
-        } catch (error) {
-            console.error('Ошибка обновления профиля:', error);
-            return { success: false, error: 'Не удалось обновить профиль' };
-        }
+    async updateUserProfile(updates) {
+        if (!this.currentUser) return;
+        await updateDoc(doc(db, 'users', this.currentUser.uid), updates);
+        Object.assign(this.currentUser, updates);
     }
     
     async changePassword(currentPassword, newPassword) {
-        if (!this.currentUser || this.currentUser.isGuest) {
-            return { success: false, error: 'Невозможно сменить пароль' };
-        }
-        
         try {
             const user = auth.currentUser;
-            const credential = EmailAuthProvider.credential(
-                user.email,
-                currentPassword
-            );
-            
-            // Переаутентификация
+            const credential = EmailAuthProvider.credential(user.email, currentPassword);
             await reauthenticateWithCredential(user, credential);
-            
-            // Смена пароля
             await updatePassword(user, newPassword);
-            
             return { success: true };
-            
         } catch (error) {
-            console.error('Ошибка смены пароля:', error);
-            return { 
-                success: false, 
-                error: this.getErrorMessage(error.code) 
-            };
+            return { success: false, error: this.getErrorMessage(error.code) };
         }
     }
     
-    async updateStats(updates) {
-        if (!this.currentUser) return;
-        
-        try {
-            const uid = this.currentUser.uid;
-            const userDocRef = doc(db, 'users', uid);
-            
-            // Используем транзакцию для безопасного обновления
-            await runTransaction(db, async (transaction) => {
-                const userDoc = await transaction.get(userDocRef);
-                
-                if (!userDoc.exists()) {
-                    throw new Error('Профиль не найден');
-                }
-                
-                const currentData = userDoc.data();
-                const newData = {};
-                
-                // Обновляем счётчики
-                if (updates.battles) newData.battles = (currentData.battles || 0) + updates.battles;
-                if (updates.wins) newData.wins = (currentData.wins || 0) + updates.wins;
-                if (updates.losses) newData.losses = (currentData.losses || 0) + updates.losses;
-                
-                if (updates.xp) {
-                    const newXp = (currentData.xp || 0) + updates.xp;
-                    const xpNeeded = currentData.level * 100;
-                    
-                    if (newXp >= xpNeeded) {
-                        // Повышение уровня
-                        newData.level = (currentData.level || 1) + 1;
-                        newData.xp = newXp - xpNeeded;
-                    } else {
-                        newData.xp = newXp;
-                    }
-                }
-                
-                transaction.update(userDocRef, newData);
-                
-                // Обновляем локально
-                Object.assign(this.currentUser, newData);
-            });
-            
-            return { success: true };
-            
-        } catch (error) {
-            console.error('Ошибка обновления статистики:', error);
-            return { success: false };
-        }
-    }
-    
-    async getLeaderboard(limitCount = 10) {
-        try {
-            const usersRef = collection(db, 'users');
-            const q = query(
-                usersRef,
-                where('isGuest', '!=', true),
-                orderBy('level', 'desc'),
-                orderBy('xp', 'desc'),
-                limit(limitCount)
-            );
-            
-            const snapshot = await getDocs(q);
-            const leaderboard = [];
-            
-            snapshot.forEach((doc) => {
-                leaderboard.push({
-                    id: doc.id,
-                    ...doc.data()
-                });
-            });
-            
-            return leaderboard;
-            
-        } catch (error) {
-            console.error('Ошибка загрузки таблицы лидеров:', error);
-            return [];
-        }
-    }
-    
-    getErrorMessage(errorCode) {
+    getErrorMessage(code) {
         const errors = {
             'auth/email-already-in-use': 'Email уже используется',
-            'auth/invalid-email': 'Неверный формат email',
-            'auth/operation-not-allowed': 'Операция не разрешена',
-            'auth/weak-password': 'Слишком слабый пароль (минимум 6 символов)',
-            'auth/user-disabled': 'Аккаунт заблокирован',
+            'auth/invalid-email': 'Неверный email',
+            'auth/weak-password': 'Слабый пароль (мин. 6 символов)',
             'auth/user-not-found': 'Пользователь не найден',
             'auth/wrong-password': 'Неверный пароль',
-            'auth/too-many-requests': 'Слишком много попыток. Попробуйте позже',
-            'auth/network-request-failed': 'Ошибка сети. Проверьте подключение',
-            'auth/popup-closed-by-user': 'Окно входа было закрыто',
-            'auth/cancelled-popup-request': 'Запрос отменён',
-            'auth/requires-recent-login': 'Требуется повторный вход',
-            'auth/invalid-credential': 'Неверные учётные данные'
+            'auth/too-many-requests': 'Слишком много попыток',
+            'auth/popup-closed-by-user': 'Окно закрыто'
         };
-        
-        return errors[errorCode] || 'Произошла ошибка';
+        return errors[code] || 'Произошла ошибка';
     }
     
     isAuthenticated() {
         return auth.currentUser !== null;
     }
-    
-    getCurrentUser() {
-        return this.currentUser;
-    }
 }
 
-// ===== КЛАСС ПРИЛОЖЕНИЯ =====
+// ===== MAIN APP =====
 class JujutsuFight {
     constructor() {
         this.authService = new Auth();
-        this.currentScreen = 'loadingScreen';
-        this.selectedCharacter = null;
-        this.selectedAvatar = '👤';
+        this.game = null;
         this.settings = this.loadSettings();
+        this.selectedAvatar = '👤';
         
         this.init();
     }
@@ -458,31 +810,34 @@ class JujutsuFight {
     init() {
         this.setup3DBackground();
         
-        // Ждём инициализации Firebase Auth
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            unsubscribe(); // Отписываемся после первой проверки
-            this.startLoading();
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                this.authService.loadUserData(user).then(() => {
+                    this.startLoading();
+                });
+            } else {
+                this.startLoading();
+            }
         });
     }
     
     startLoading() {
-        const progressBar = document.getElementById('loadingProgress');
-        const loadingText = document.getElementById('loadingText');
+        const progress = document.getElementById('loadingProgress');
+        const text = document.getElementById('loadingText');
         
-        const loadingSteps = [
-            { progress: 20, text: 'Подключение к Firebase...' },
-            { progress: 40, text: 'Загрузка ресурсов...' },
-            { progress: 60, text: 'Инициализация графики...' },
-            { progress: 80, text: 'Загрузка персонажей...' },
-            { progress: 100, text: 'Готово!' }
+        const steps = [
+            { p: 25, t: 'Подключение...' },
+            { p: 50, t: 'Загрузка ресурсов...' },
+            { p: 75, t: 'Инициализация...' },
+            { p: 100, t: 'Готово!' }
         ];
         
-        let step = 0;
+        let i = 0;
         const interval = setInterval(() => {
-            if (step < loadingSteps.length) {
-                progressBar.style.width = loadingSteps[step].progress + '%';
-                loadingText.textContent = loadingSteps[step].text;
-                step++;
+            if (i < steps.length) {
+                progress.style.width = steps[i].p + '%';
+                text.textContent = steps[i].t;
+                i++;
             } else {
                 clearInterval(interval);
                 setTimeout(() => this.onLoadingComplete(), 500);
@@ -491,16 +846,9 @@ class JujutsuFight {
     }
     
     onLoadingComplete() {
-        // Проверяем авторизацию
-        if (this.authService.isAuthenticated()) {
-            // Ждём загрузки данных пользователя
-            const checkUser = setInterval(() => {
-                if (this.authService.currentUser) {
-                    clearInterval(checkUser);
-                    this.setupApp();
-                    this.navigateTo('mainMenu');
-                }
-            }, 100);
+        if (this.authService.isAuthenticated() && this.authService.currentUser) {
+            this.setupApp();
+            this.navigateTo('mainMenu');
         } else {
             this.setupAuthScreens();
             this.navigateTo('loginScreen');
@@ -514,37 +862,21 @@ class JujutsuFight {
         this.setupProfile();
         this.applySettings();
         this.updateUserDisplay();
-        
-        console.log('✓ Приложение готово');
     }
     
-    // ===== 3D ФОН =====
     setup3DBackground() {
         const container = document.getElementById('background3D');
         
-        this.scene = new THREE.Scene();
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 5;
         
-        this.camera = new THREE.PerspectiveCamera(
-            75,
-            window.innerWidth / window.innerHeight,
-            0.1,
-            1000
-        );
-        this.camera.position.z = 5;
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor(0x0a0a0f, 1);
+        container.appendChild(renderer.domElement);
         
-        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
-        this.renderer.setClearColor(0x0a0a0f, 1);
-        container.appendChild(this.renderer.domElement);
-        
-        this.createParticles();
-        this.createShapes();
-        this.animate();
-        
-        window.addEventListener('resize', () => this.onResize());
-    }
-    
-    createParticles() {
+        // Particles
         const geometry = new THREE.BufferGeometry();
         const count = 1500;
         const positions = new Float32Array(count * 3);
@@ -573,144 +905,122 @@ class JujutsuFight {
             blending: THREE.AdditiveBlending
         });
         
-        this.particles = new THREE.Points(geometry, material);
-        this.scene.add(this.particles);
-    }
-    
-    createShapes() {
-        this.shapes = [];
+        const particles = new THREE.Points(geometry, material);
+        scene.add(particles);
         
-        const geometries = [
-            new THREE.OctahedronGeometry(0.5),
-            new THREE.TetrahedronGeometry(0.4),
-            new THREE.IcosahedronGeometry(0.3)
-        ];
+        const animate = () => {
+            requestAnimationFrame(animate);
+            particles.rotation.x += 0.0003;
+            particles.rotation.y += 0.0005;
+            renderer.render(scene, camera);
+        };
         
-        for (let i = 0; i < 8; i++) {
-            const geometry = geometries[i % geometries.length];
-            const material = new THREE.MeshBasicMaterial({
-                color: new THREE.Color().setHSL(0.6 + Math.random() * 0.3, 0.8, 0.5),
-                wireframe: true,
-                transparent: true,
-                opacity: 0.3
-            });
-            
-            const mesh = new THREE.Mesh(geometry, material);
-            mesh.position.set(
-                (Math.random() - 0.5) * 10,
-                (Math.random() - 0.5) * 10,
-                (Math.random() - 0.5) * 5
-            );
-            
-            mesh.userData = {
-                rotationSpeed: {
-                    x: (Math.random() - 0.5) * 0.02,
-                    y: (Math.random() - 0.5) * 0.02
-                },
-                floatSpeed: Math.random() * 0.5 + 0.5,
-                floatOffset: Math.random() * Math.PI * 2
-            };
-            
-            this.shapes.push(mesh);
-            this.scene.add(mesh);
-        }
-    }
-    
-    animate() {
-        requestAnimationFrame(() => this.animate());
+        animate();
         
-        const time = Date.now() * 0.001;
-        
-        if (this.particles) {
-            this.particles.rotation.x += 0.0003;
-            this.particles.rotation.y += 0.0005;
-        }
-        
-        this.shapes.forEach(shape => {
-            shape.rotation.x += shape.userData.rotationSpeed.x;
-            shape.rotation.y += shape.userData.rotationSpeed.y;
-            shape.position.y += Math.sin(time * shape.userData.floatSpeed + shape.userData.floatOffset) * 0.002;
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
         });
-        
-        this.renderer.render(this.scene, this.camera);
     }
     
-    onResize() {
-        this.camera.aspect = window.innerWidth / window.innerHeight;
-        this.camera.updateProjectionMatrix();
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
-    }
-    
-    // ===== АВТОРИЗАЦИЯ =====
     setupAuthScreens() {
-        // Форма входа
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            await this.handleLogin();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const errorEl = document.getElementById('loginError');
+            
+            const result = await this.authService.login(email, password);
+            if (result.success) {
+                setTimeout(() => {
+                    this.setupApp();
+                    this.navigateTo('mainMenu');
+                }, 500);
+            } else {
+                errorEl.textContent = result.error;
+                errorEl.classList.add('show');
+                setTimeout(() => errorEl.classList.remove('show'), 3000);
+            }
         });
         
-        // Форма регистрации
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            await this.handleRegister();
+            const username = document.getElementById('registerUsername').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirm = document.getElementById('registerConfirm').value;
+            const errorEl = document.getElementById('registerError');
+            
+            if (password !== confirm) {
+                errorEl.textContent = 'Пароли не совпадают';
+                errorEl.classList.add('show');
+                setTimeout(() => errorEl.classList.remove('show'), 3000);
+                return;
+            }
+            
+            const result = await this.authService.register(email, password, username);
+            if (result.success) {
+                this.showNotification('🎉 ' + result.message);
+                setTimeout(() => {
+                    this.setupApp();
+                    this.navigateTo('mainMenu');
+                }, 1000);
+            } else {
+                errorEl.textContent = result.error;
+                errorEl.classList.add('show');
+                setTimeout(() => errorEl.classList.remove('show'), 3000);
+            }
         });
         
-        // Форма восстановления
         document.getElementById('forgotForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            await this.handleForgotPassword();
+            const email = document.getElementById('forgotEmail').value;
+            const result = await this.authService.resetPassword(email);
+            
+            if (result.success) {
+                document.getElementById('forgotSuccess').textContent = result.message;
+                document.getElementById('forgotSuccess').classList.add('show');
+            } else {
+                document.getElementById('forgotError').textContent = result.error;
+                document.getElementById('forgotError').classList.add('show');
+            }
         });
         
-        // Переключение между формами
         document.getElementById('showRegister').addEventListener('click', (e) => {
             e.preventDefault();
-            this.clearFormErrors();
             this.navigateTo('registerScreen');
         });
         
         document.getElementById('showLogin').addEventListener('click', (e) => {
             e.preventDefault();
-            this.clearFormErrors();
             this.navigateTo('loginScreen');
         });
         
         document.getElementById('forgotPassword').addEventListener('click', (e) => {
             e.preventDefault();
-            this.clearFormErrors();
             this.navigateTo('forgotScreen');
         });
         
         document.getElementById('backToLogin').addEventListener('click', (e) => {
             e.preventDefault();
-            this.clearFormErrors();
             this.navigateTo('loginScreen');
         });
         
-        // Вход как гость
         document.getElementById('guestLogin').addEventListener('click', async () => {
-            this.showButtonLoading('guestLogin', true);
             const result = await this.authService.loginAsGuest();
-            this.showButtonLoading('guestLogin', false);
-            
             if (result.success) {
                 this.showNotification('👤 Вы вошли как гость');
                 setTimeout(() => {
                     this.setupApp();
                     this.navigateTo('mainMenu');
                 }, 500);
-            } else {
-                this.showNotification('❌ ' + result.error);
             }
         });
         
-        // Google вход
         document.getElementById('googleLogin').addEventListener('click', async () => {
-            this.showButtonLoading('googleLogin', true);
             const result = await this.authService.loginWithGoogle();
-            this.showButtonLoading('googleLogin', false);
-            
             if (result.success) {
-                this.showNotification('✓ Вход выполнен');
                 setTimeout(() => {
                     this.setupApp();
                     this.navigateTo('mainMenu');
@@ -720,193 +1030,53 @@ class JujutsuFight {
             }
         });
         
-        // Показать/скрыть пароль
         document.querySelectorAll('.toggle-password').forEach(btn => {
             btn.addEventListener('click', () => {
                 const input = document.getElementById(btn.dataset.target);
-                if (input.type === 'password') {
-                    input.type = 'text';
-                    btn.textContent = '🙈';
-                } else {
-                    input.type = 'password';
-                    btn.textContent = '👁️';
-                }
+                input.type = input.type === 'password' ? 'text' : 'password';
+                btn.textContent = input.type === 'password' ? '👁️' : '🙈';
             });
         });
         
-        // Сила пароля
         document.getElementById('registerPassword').addEventListener('input', (e) => {
-            this.checkPasswordStrength(e.target.value);
-        });
-        
-        // Условия
-        document.getElementById('termsLink').addEventListener('click', (e) => {
-            e.preventDefault();
-            this.showNotification('📜 Пользовательское соглашение');
-        });
-    }
-    
-    async handleLogin() {
-        const email = document.getElementById('loginEmail').value.trim();
-        const password = document.getElementById('loginPassword').value;
-        const errorEl = document.getElementById('loginError');
-        const submitBtn = document.querySelector('#loginForm button[type="submit"]');
-        
-        this.showButtonLoading(submitBtn, true);
-        
-        const result = await this.authService.login(email, password);
-        
-        this.showButtonLoading(submitBtn, false);
-        
-        if (result.success) {
-            this.showNotification('✓ Вход выполнен');
-            setTimeout(() => {
-                this.setupApp();
-                this.navigateTo('mainMenu');
-            }, 500);
-        } else {
-            errorEl.textContent = result.error;
-            errorEl.classList.add('show');
-            setTimeout(() => errorEl.classList.remove('show'), 4000);
-        }
-    }
-    
-    async handleRegister() {
-        const username = document.getElementById('registerUsername').value.trim();
-        const email = document.getElementById('registerEmail').value.trim();
-        const password = document.getElementById('registerPassword').value;
-        const confirm = document.getElementById('registerConfirm').value;
-        const errorEl = document.getElementById('registerError');
-        const submitBtn = document.querySelector('#registerForm button[type="submit"]');
-        
-        // Валидация
-        if (password !== confirm) {
-            errorEl.textContent = 'Пароли не совпадают';
-            errorEl.classList.add('show');
-            setTimeout(() => errorEl.classList.remove('show'), 3000);
-            return;
-        }
-        
-        if (password.length < 6) {
-            errorEl.textContent = 'Пароль должен быть минимум 6 символов';
-            errorEl.classList.add('show');
-            setTimeout(() => errorEl.classList.remove('show'), 3000);
-            return;
-        }
-        
-        if (username.length < 3) {
-            errorEl.textContent = 'Имя должно быть минимум 3 символа';
-            errorEl.classList.add('show');
-            setTimeout(() => errorEl.classList.remove('show'), 3000);
-            return;
-        }
-        
-        this.showButtonLoading(submitBtn, true);
-        
-        const result = await this.authService.register(email, password, username);
-        
-        this.showButtonLoading(submitBtn, false);
-        
-        if (result.success) {
-            this.showNotification('🎉 ' + result.message);
-            setTimeout(() => {
-                this.setupApp();
-                this.navigateTo('mainMenu');
-            }, 1000);
-        } else {
-            errorEl.textContent = result.error;
-            errorEl.classList.add('show');
-            setTimeout(() => errorEl.classList.remove('show'), 4000);
-        }
-    }
-    
-    async handleForgotPassword() {
-        const email = document.getElementById('forgotEmail').value.trim();
-        const errorEl = document.getElementById('forgotError');
-        const successEl = document.getElementById('forgotSuccess');
-        const submitBtn = document.querySelector('#forgotForm button[type="submit"]');
-        
-        this.showButtonLoading(submitBtn, true);
-        
-        const result = await this.authService.resetPassword(email);
-        
-        this.showButtonLoading(submitBtn, false);
-        
-        if (result.success) {
-            successEl.textContent = result.message;
-            successEl.classList.add('show');
-            document.getElementById('forgotEmail').value = '';
-            setTimeout(() => successEl.classList.remove('show'), 5000);
-        } else {
-            errorEl.textContent = result.error;
-            errorEl.classList.add('show');
-            setTimeout(() => errorEl.classList.remove('show'), 4000);
-        }
-    }
-    
-    clearFormErrors() {
-        document.querySelectorAll('.auth-error, .auth-success').forEach(el => {
-            el.classList.remove('show');
-        });
-    }
-    
-    checkPasswordStrength(password) {
-        const fill = document.getElementById('strengthFill');
-        const text = document.getElementById('strengthText');
-        
-        fill.className = 'strength-fill';
-        text.className = 'strength-text';
-        
-        if (password.length === 0) {
-            text.textContent = 'Введите пароль';
-            return;
-        }
-        
-        let strength = 0;
-        if (password.length >= 6) strength++;
-        if (password.length >= 10) strength++;
-        if (/[A-Z]/.test(password)) strength++;
-        if (/[0-9]/.test(password)) strength++;
-        if (/[^A-Za-z0-9]/.test(password)) strength++;
-        
-        if (strength <= 2) {
-            fill.classList.add('weak');
-            text.classList.add('weak');
-            text.textContent = 'Слабый пароль';
-        } else if (strength <= 3) {
-            fill.classList.add('medium');
-            text.classList.add('medium');
-            text.textContent = 'Средний пароль';
-        } else {
-            fill.classList.add('strong');
-            text.classList.add('strong');
-            text.textContent = 'Надёжный пароль';
-        }
-    }
-    
-    showButtonLoading(btn, show) {
-        if (typeof btn === 'string') {
-            btn = document.getElementById(btn);
-        }
-        
-        if (!btn) return;
-        
-        if (show) {
-            btn.dataset.originalText = btn.textContent;
-            btn.textContent = '⏳ Загрузка...';
-            btn.disabled = true;
-        } else {
-            if (btn.dataset.originalText) {
-                btn.textContent = btn.dataset.originalText;
+            const password = e.target.value;
+            const fill = document.getElementById('strengthFill');
+            const text = document.getElementById('strengthText');
+            
+            fill.className = 'strength-fill';
+            text.className = 'strength-text';
+            
+            if (password.length === 0) {
+                text.textContent = 'Введите пароль';
+                return;
             }
-            btn.disabled = false;
-        }
+            
+            let strength = 0;
+            if (password.length >= 6) strength++;
+            if (password.length >= 10) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^A-Za-z0-9]/.test(password)) strength++;
+            
+            if (strength <= 2) {
+                fill.classList.add('weak');
+                text.classList.add('weak');
+                text.textContent = 'Слабый пароль';
+            } else if (strength <= 3) {
+                fill.classList.add('medium');
+                text.classList.add('medium');
+                text.textContent = 'Средний пароль';
+            } else {
+                fill.classList.add('strong');
+                text.classList.add('strong');
+                text.textContent = 'Надёжный пароль';
+            }
+        });
     }
     
-    // ===== НАВИГАЦИЯ =====
     setupNavigation() {
         document.getElementById('playBtn').addEventListener('click', () => {
-            this.showNotification('🎮 Игра в разработке!');
+            this.startGame();
         });
         
         document.getElementById('charactersBtn').addEventListener('click', () => {
@@ -926,73 +1096,71 @@ class JujutsuFight {
             this.navigateTo('aboutScreen');
         });
         
-        // Кнопки назад
-        document.getElementById('backFromCharacters').addEventListener('click', () => {
+        document.getElementById('backFromCharacters').addEventListener('click', () => this.navigateTo('mainMenu'));
+        document.getElementById('backFromProfile').addEventListener('click', () => this.navigateTo('mainMenu'));
+        document.getElementById('backFromSettings').addEventListener('click', () => this.navigateTo('mainMenu'));
+        document.getElementById('backFromAbout').addEventListener('click', () => this.navigateTo('mainMenu'));
+        
+        document.getElementById('backFromGame').addEventListener('click', () => {
+            this.stopGame();
             this.navigateTo('mainMenu');
         });
         
-        document.getElementById('backFromProfile').addEventListener('click', () => {
-            this.navigateTo('mainMenu');
+        document.getElementById('pauseBtn').addEventListener('click', () => {
+            if (this.game) this.game.isRunning = !this.game.isRunning;
         });
         
-        document.getElementById('backFromSettings').addEventListener('click', () => {
-            this.navigateTo('mainMenu');
-        });
-        
-        document.getElementById('backFromAbout').addEventListener('click', () => {
-            this.navigateTo('mainMenu');
-        });
-        
-        // Выход
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            this.handleLogout();
-        });
-    }
-    
-    navigateTo(screenId) {
-        const currentScreen = document.querySelector('.screen.active');
-        if (currentScreen) {
-            currentScreen.classList.remove('active');
-            setTimeout(() => {
-                currentScreen.style.display = 'none';
-            }, 300);
-        }
-        
-        setTimeout(() => {
-            const newScreen = document.getElementById(screenId);
-            newScreen.style.display = 'flex';
-            setTimeout(() => {
-                newScreen.classList.add('active');
-            }, 50);
-        }, 300);
-        
-        this.currentScreen = screenId;
-    }
-    
-    async handleLogout() {
-        const result = await this.authService.logout();
-        if (result.success) {
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            await this.authService.logout();
             this.showNotification('👋 До свидания!');
-            setTimeout(() => {
-                this.setupAuthScreens();
-                this.navigateTo('loginScreen');
-            }, 500);
+            this.setupAuthScreens();
+            this.navigateTo('loginScreen');
+        });
+    }
+    
+    startGame() {
+        this.navigateTo('gameScreen');
+        const container = document.getElementById('gameContainer');
+        container.innerHTML = '';
+        this.game = new Game(container);
+    }
+    
+    stopGame() {
+        if (this.game) {
+            this.game.destroy();
+            this.game = null;
         }
     }
     
-    updateUserDisplay() {
-        if (!this.authService.currentUser) return;
-        
-        const user = this.authService.currentUser;
-        document.getElementById('userAvatar').textContent = user.avatar;
-        document.getElementById('userName').textContent = user.username;
-        document.getElementById('userLevel').textContent = `Уровень ${user.level}`;
+    setupCharacters() {
+        document.querySelectorAll('.character-card').forEach(card => {
+            card.addEventListener('click', () => {
+                if (card.classList.contains('locked')) {
+                    this.showNotification('🔒 Персонаж заблокирован!');
+                    return;
+                }
+                
+                document.querySelectorAll('.character-card').forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+                
+                const name = card.querySelector('.character-name').textContent;
+                this.showNotification(`✓ Выбран: ${name}`);
+            });
+        });
     }
     
-    // ===== ПРОФИЛЬ =====
     setupProfile() {
         document.getElementById('editProfileBtn').addEventListener('click', () => {
-            this.openEditProfileModal();
+            const user = this.authService.currentUser;
+            document.getElementById('editUsername').value = user.username;
+            
+            document.querySelectorAll('.avatar-option').forEach(opt => {
+                opt.classList.remove('selected');
+                if (opt.dataset.avatar === user.avatar) opt.classList.add('selected');
+            });
+            this.selectedAvatar = user.avatar;
+            
+            this.openModal('editProfileModal');
         });
         
         document.getElementById('cancelEditProfile').addEventListener('click', () => {
@@ -1001,7 +1169,25 @@ class JujutsuFight {
         
         document.getElementById('editProfileForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            await this.saveProfileEdits();
+            const username = document.getElementById('editUsername').value;
+            
+            await this.authService.updateUserProfile({
+                username,
+                avatar: this.selectedAvatar
+            });
+            
+            this.updateUserDisplay();
+            this.updateProfileDisplay();
+            this.closeModal('editProfileModal');
+            this.showNotification('✓ Профиль обновлён');
+        });
+        
+        document.querySelectorAll('.avatar-option').forEach(opt => {
+            opt.addEventListener('click', () => {
+                document.querySelectorAll('.avatar-option').forEach(o => o.classList.remove('selected'));
+                opt.classList.add('selected');
+                this.selectedAvatar = opt.dataset.avatar;
+            });
         });
         
         document.getElementById('changePasswordBtn').addEventListener('click', () => {
@@ -1018,149 +1204,29 @@ class JujutsuFight {
         
         document.getElementById('changePasswordForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            await this.handleChangePassword();
-        });
-        
-        document.querySelectorAll('.avatar-option').forEach(option => {
-            option.addEventListener('click', () => {
-                document.querySelectorAll('.avatar-option').forEach(o => o.classList.remove('selected'));
-                option.classList.add('selected');
-                this.selectedAvatar = option.dataset.avatar;
-            });
-        });
-    }
-    
-    openEditProfileModal() {
-        const user = this.authService.currentUser;
-        document.getElementById('editUsername').value = user.username;
-        
-        document.querySelectorAll('.avatar-option').forEach(option => {
-            option.classList.remove('selected');
-            if (option.dataset.avatar === user.avatar) {
-                option.classList.add('selected');
+            const current = document.getElementById('currentPassword').value;
+            const newPass = document.getElementById('newPassword').value;
+            const confirm = document.getElementById('confirmNewPassword').value;
+            const errorEl = document.getElementById('changePasswordError');
+            
+            if (newPass !== confirm) {
+                errorEl.textContent = 'Пароли не совпадают';
+                errorEl.classList.add('show');
+                return;
+            }
+            
+            const result = await this.authService.changePassword(current, newPass);
+            if (result.success) {
+                this.closeModal('changePasswordModal');
+                this.showNotification('🔑 Пароль изменён');
+                document.getElementById('changePasswordForm').reset();
+            } else {
+                errorEl.textContent = result.error;
+                errorEl.classList.add('show');
             }
         });
-        this.selectedAvatar = user.avatar;
-        
-        this.openModal('editProfileModal');
     }
     
-    async saveProfileEdits() {
-        const newUsername = document.getElementById('editUsername').value.trim();
-        
-        if (newUsername.length < 3) {
-            this.showNotification('❌ Имя слишком короткое');
-            return;
-        }
-        
-        const result = await this.authService.updateProfile({
-            username: newUsername,
-            avatar: this.selectedAvatar
-        });
-        
-        if (result.success) {
-            this.updateUserDisplay();
-            this.updateProfileDisplay();
-            this.closeModal('editProfileModal');
-            this.showNotification('✓ Профиль обновлён');
-        } else {
-            this.showNotification('❌ ' + result.error);
-        }
-    }
-    
-    async handleChangePassword() {
-        const current = document.getElementById('currentPassword').value;
-        const newPass = document.getElementById('newPassword').value;
-        const confirm = document.getElementById('confirmNewPassword').value;
-        const errorEl = document.getElementById('changePasswordError');
-        
-        if (newPass !== confirm) {
-            errorEl.textContent = 'Пароли не совпадают';
-            errorEl.classList.add('show');
-            setTimeout(() => errorEl.classList.remove('show'), 3000);
-            return;
-        }
-        
-        if (newPass.length < 6) {
-            errorEl.textContent = 'Пароль должен быть минимум 6 символов';
-            errorEl.classList.add('show');
-            setTimeout(() => errorEl.classList.remove('show'), 3000);
-            return;
-        }
-        
-        const result = await this.authService.changePassword(current, newPass);
-        
-        if (result.success) {
-            this.closeModal('changePasswordModal');
-            this.showNotification('🔑 Пароль изменён');
-            document.getElementById('changePasswordForm').reset();
-        } else {
-            errorEl.textContent = result.error;
-            errorEl.classList.add('show');
-            setTimeout(() => errorEl.classList.remove('show'), 4000);
-        }
-    }
-    
-    updateProfileDisplay() {
-        const user = this.authService.currentUser;
-        if (!user) return;
-        
-        document.getElementById('profileAvatar').textContent = user.avatar;
-        document.getElementById('profileName').textContent = user.username;
-        document.getElementById('profileEmail').textContent = user.isGuest ? 'Гостевой аккаунт' : user.email;
-        document.getElementById('profileLevel').textContent = user.level;
-        
-        const xpNeeded = user.level * 100;
-        const xpPercent = (user.xp / xpNeeded) * 100;
-        document.getElementById('xpFill').style.width = xpPercent + '%';
-        document.getElementById('xpText').textContent = `${user.xp} / ${xpNeeded} XP`;
-        
-        document.getElementById('statBattles').textContent = user.battles;
-        document.getElementById('statWins').textContent = user.wins;
-        document.getElementById('statLosses').textContent = user.losses;
-        const winrate = user.battles > 0 ? Math.round((user.wins / user.battles) * 100) : 0;
-        document.getElementById('statWinrate').textContent = winrate + '%';
-    }
-    
-    openModal(modalId) {
-        const modal = document.getElementById(modalId);
-        modal.style.display = 'flex';
-        setTimeout(() => modal.classList.add('active'), 50);
-    }
-    
-    closeModal(modalId) {
-        const modal = document.getElementById(modalId);
-        modal.classList.remove('active');
-        setTimeout(() => modal.style.display = 'none', 300);
-    }
-    
-    // ===== ПЕРСОНАЖИ =====
-    setupCharacters() {
-        const cards = document.querySelectorAll('.character-card');
-        
-        cards.forEach(card => {
-            card.addEventListener('click', () => {
-                const user = this.authService.currentUser;
-                const characterId = card.dataset.character;
-                
-                if (card.classList.contains('locked')) {
-                    if (!user.unlockedCharacters.includes(characterId)) {
-                        this.showNotification('🔒 Персонаж заблокирован!');
-                        return;
-                    }
-                }
-                
-                cards.forEach(c => c.classList.remove('selected'));
-                card.classList.add('selected');
-                
-                const characterName = card.querySelector('.character-name').textContent;
-                this.selectedCharacter = characterId;
-                this.showNotification(`✓ Выбран: ${characterName}`);
-            });
-        });
-    }
-    
-    // ===== НАСТРОЙКИ =====
     setupSettings() {
         const musicSlider = document.getElementById('musicVolume');
         const musicValue = document.getElementById('musicValue');
@@ -1204,11 +1270,8 @@ class JujutsuFight {
     }
     
     loadSettings() {
-        const saved = localStorage.getItem('jujutsuFightSettings');
-        if (saved) {
-            return JSON.parse(saved);
-        }
-        return {
+        const saved = localStorage.getItem('jujutsuSettings');
+        return saved ? JSON.parse(saved) : {
             musicVolume: 70,
             sfxVolume: 80,
             vibration: true,
@@ -1219,16 +1282,14 @@ class JujutsuFight {
     }
     
     saveSettings() {
-        localStorage.setItem('jujutsuFightSettings', JSON.stringify(this.settings));
+        localStorage.setItem('jujutsuSettings', JSON.stringify(this.settings));
     }
     
     applySettings() {
         document.getElementById('musicVolume').value = this.settings.musicVolume;
         document.getElementById('musicValue').textContent = this.settings.musicVolume + '%';
-        
         document.getElementById('sfxVolume').value = this.settings.sfxVolume;
         document.getElementById('sfxValue').textContent = this.settings.sfxVolume + '%';
-        
         document.getElementById('vibrationToggle').checked = this.settings.vibration;
         document.getElementById('graphicsQuality').value = this.settings.graphicsQuality;
         document.getElementById('language').value = this.settings.language;
@@ -1248,25 +1309,76 @@ class JujutsuFight {
         this.saveSettings();
     }
     
-    // ===== УВЕДОМЛЕНИЯ =====
+    updateUserDisplay() {
+        const user = this.authService.currentUser;
+        if (!user) return;
+        
+        document.getElementById('userAvatar').textContent = user.avatar;
+        document.getElementById('userName').textContent = user.username;
+        document.getElementById('userLevel').textContent = `Уровень ${user.level}`;
+    }
+    
+    updateProfileDisplay() {
+        const user = this.authService.currentUser;
+        if (!user) return;
+        
+        document.getElementById('profileAvatar').textContent = user.avatar;
+        document.getElementById('profileName').textContent = user.username;
+        document.getElementById('profileEmail').textContent = user.isGuest ? 'Гостевой аккаунт' : user.email;
+        document.getElementById('profileLevel').textContent = user.level;
+        
+        const xpNeeded = user.level * 100;
+        const xpPercent = (user.xp / xpNeeded) * 100;
+        document.getElementById('xpFill').style.width = xpPercent + '%';
+        document.getElementById('xpText').textContent = `${user.xp} / ${xpNeeded} XP`;
+        
+        document.getElementById('statBattles').textContent = user.battles;
+        document.getElementById('statWins').textContent = user.wins;
+        document.getElementById('statLosses').textContent = user.losses;
+        const winrate = user.battles > 0 ? Math.round((user.wins / user.battles) * 100) : 0;
+        document.getElementById('statWinrate').textContent = winrate + '%';
+    }
+    
+    navigateTo(screenId) {
+        const current = document.querySelector('.screen.active');
+        if (current) {
+            current.classList.remove('active');
+            setTimeout(() => { current.style.display = 'none'; }, 300);
+        }
+        
+        setTimeout(() => {
+            const next = document.getElementById(screenId);
+            next.style.display = 'flex';
+            setTimeout(() => next.classList.add('active'), 50);
+        }, 300);
+    }
+    
+    openModal(id) {
+        const modal = document.getElementById(id);
+        modal.style.display = 'flex';
+        setTimeout(() => modal.classList.add('active'), 50);
+    }
+    
+    closeModal(id) {
+        const modal = document.getElementById(id);
+        modal.classList.remove('active');
+        setTimeout(() => { modal.style.display = 'none'; }, 300);
+    }
+    
     showNotification(text) {
         const notification = document.getElementById('notification');
-        const notificationText = document.getElementById('notificationText');
-        
-        notificationText.textContent = text;
+        document.getElementById('notificationText').textContent = text;
         notification.classList.add('show');
         
         if (this.settings.vibration && navigator.vibrate) {
             navigator.vibrate(50);
         }
         
-        setTimeout(() => {
-            notification.classList.remove('show');
-        }, 2500);
+        setTimeout(() => notification.classList.remove('show'), 2500);
     }
 }
 
-// ===== ЗАПУСК =====
+// ===== START =====
 window.addEventListener('DOMContentLoaded', () => {
     window.app = new JujutsuFight();
 });
